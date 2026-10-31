@@ -922,8 +922,6 @@ export default function App() {
   );
 }
 
-
-
   // ==========================================================================
   // REGLA FIREBASE 1 Y 3: Inicialización de Auth antes de cualquier consulta
   // ==========================================================================
