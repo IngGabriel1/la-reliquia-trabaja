@@ -726,68 +726,203 @@ const NEXTJS_STRUCTURE_DOC = `la-reliquia-trabaja/
 // ============================================================================
 // 6. COMPONENTE PRINCIPAL DE LA APLICACIÓN
 // ============================================================================
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Search, Briefcase, Users, MapPin, Phone, CheckCircle2, ShieldCheck, PlusCircle, Camera, Image as ImageIcon, Trash2, Edit3, AlertTriangle, Flag, Lock, Unlock, Eye, X, Menu, ChevronRight, Star, Clock, DollarSign, Building2, FileText, Terminal, Copy, Check, Hammer, Scissors, Wrench, Utensils, Laptop, Sparkles, Zap, Home as HomeIcon, ShoppingBag, UserCheck, LogOut, KeyRound, ExternalLink, RefreshCw, Scale, Database, FolderGit2 } from 'lucide-react';
+
+const CATEGORIES = [
+  { id: 'construccion', name: 'Construcción y Obra', icon: Hammer, description: 'Maestros de obra, enchape, estuco, pintura.', color: 'bg-blue-100 text-blue-900 border-blue-200' },
+  { id: 'confeccion', name: 'Confección y Textil', icon: Scissors, description: 'Modistería, arreglos de ropa, dotaciones.', color: 'bg-indigo-100 text-indigo-900 border-indigo-200' },
+  { id: 'mecanica', name: 'Mecánica de Motos', icon: Wrench, description: 'Mantenimiento preventivo, electricidad, despinchado.', color: 'bg-slate-200 text-slate-900 border-slate-300' },
+  { id: 'gastronomia', name: 'Gastronomía', icon: Utensils, description: 'Panadería artesanal, amasijos llaneros.', color: 'bg-sky-100 text-sky-900 border-sky-200' },
+  { id: 'tecnologia', name: 'Tecnología y Sistemas', icon: Laptop, description: 'Mantenimiento de PC, celulares, cámaras.', color: 'bg-cyan-100 text-cyan-900 border-cyan-200' },
+  { id: 'belleza', name: 'Belleza y Barbería', icon: Sparkles, description: 'Cortes, peluquería, manicure, maquillaje.', color: 'bg-violet-100 text-violet-900 border-violet-200' },
+  { id: 'electricidad', name: 'Electricidad y Plomería', icon: Zap, description: 'Instalaciones eléctricas, fugas de agua.', color: 'bg-blue-50 text-blue-800 border-blue-200' },
+  { id: 'hogar', name: 'Servicios del Hogar', icon: HomeIcon, description: 'Aseo general, jardinería, cuidado de niños.', color: 'bg-teal-100 text-teal-900 border-teal-200' },
+  { id: 'comercio', name: 'Comercio y Domicilios', icon: ShoppingBag, description: 'Atención de locales, domicilios en moto.', color: 'bg-slate-100 text-slate-800 border-slate-200' }
+];
+
+const SECTORS = ['Sector 1 - La Reliquia', 'Sector 2 - La Reliquia', 'Sector 3 - La Reliquia', 'Sector 4 - La Reliquia', 'Zona Comercial Principal', 'Sector Polideportivo / Colegio', 'Alrededores (Trece de Mayo)'];
+const AVAILABILITY_OPTIONS = ['Disponible ahora', 'Tiempo completo', 'Medio tiempo / Por horas', 'Por contrato o proyecto', 'Fines de semana'];
+const JOB_TYPES = ['Tiempo completo', 'Medio tiempo', 'Por obra o labor', 'Por días / Turnos', 'Fines de semana'];
+const JOB_MODALITIES = ['Presencial en La Reliquia', 'Presencial en Villavicencio', 'Ruta / Domicilios', 'Trabajo desde taller en casa'];
+
+const createSvgPortfolioDataUri = (title, subtitle, bgHex, accentHex) => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520"><rect width="800" height="520" fill="${bgHex}"/><text x="400" y="260" font-family="sans-serif" font-size="36" fill="#fff" text-anchor="middle">${title}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+};
+
+const INITIAL_PROFILES = [
+  { id: 'worker-1', uid: 'demo-worker-1', name: 'Carlos Julio Garzón', profession: 'Maestro de Obra Blanca', category: 'construccion', sector: 'Sector 2 - La Reliquia', experienceYears: 14, skills: ['Enchape', 'Estuco', 'Drywall'], bio: 'Maestro de construcción habitante de La Reliquia.', availability: 'Disponible ahora', whatsapp: '3114567890', email: 'carlos@test.co', consentHabeasData: true, consentPublicWhatsapp: true, status: 'approved', verified: true, rating: 4.9 },
+  { id: 'worker-2', uid: 'demo-worker-2', name: 'Luz Marina Castañeda', profession: 'Modista Textil', category: 'confeccion', sector: 'Sector 1 - La Reliquia', experienceYears: 18, skills: ['Uniformes', 'Dotaciones'], bio: 'Taller propio de confección en el Sector 1.', availability: 'Por contrato o proyecto', whatsapp: '3129876543', email: 'luz@test.co', consentHabeasData: true, consentPublicWhatsapp: true, status: 'approved', verified: true, rating: 5.0 }
+];
+
+const INITIAL_PORTFOLIO = [
+  { id: 'port-1', profileId: 'worker-1', workerName: 'Carlos Julio Garzón', title: 'Remodelación Cocina', description: 'Enchape en cerámica tipo metro.', category: 'construccion', imageUrl: createSvgPortfolioDataUri('Cocina Integral', 'Sector 2', '#1e3a8a', '#3b82f6'), fileFormat: 'image/svg+xml', fileSizeKB: 42, status: 'approved' }
+];
+
+const INITIAL_JOBS = [
+  { id: 'job-1', title: 'Auxiliar de Panadería', company: 'Panadería El Trigal', category: 'gastronomia', sector: 'Zona Comercial Principal', jobType: 'Tiempo completo', modality: 'Presencial en La Reliquia', salaryCOP: '$1.450.000', description: 'Apoyo en horneo y atención.', requirements: ['Vivir en La Reliquia'], publishedAt: '2025-02-15', closingDate: '2025-04-30', status: 'abierta', contactWhatsapp: '3118889900', authorUid: 'demo-employer-1' }
+];
+
 export default function App() {
-  // --- Estado de Autenticación y Rol ---
-  const [user, setUser] = useState(null);
-  const [authReady, setAuthReady] = useState(false);
   const [activePersonaUid, setActivePersonaUid] = useState(null);
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [sessionAccount, setSessionAccount] = useState({
-    email: 'vecino.reliquia@villavicencio.co',
-    emailVerified: true,
-    displayName: 'Habitante de La Reliquia'
-  });
-
-  // --- Navegación Principal ---
+  const [sessionAccount, setSessionAccount] = useState({ email: 'vecino@reliquia.co', displayName: 'Habitante' });
   const [activeTab, setActiveTab] = useState('inicio');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado de sesión simulado
-
-  // --- Estado de Datos Sincronizados en Base de Datos ---
-  const [profiles, setProfiles] = useState([]);
-  const [portfolioItems, setPortfolioItems] = useState([]);
-  const [jobPostings, setJobPostings] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [profiles, setProfiles] = useState(INITIAL_PROFILES);
+  const [portfolioItems, setPortfolioItems] = useState(INITIAL_PORTFOLIO);
+  const [jobPostings, setJobPostings] = useState(INITIAL_JOBS);
   const [jobApplications, setJobApplications] = useState([]);
   const [reports, setReports] = useState([]);
-  const [adminLogs, setAdminLogs] = useState([]);
-  const [dbLoading, setDbLoading] = useState(true);
-  const [seedingInProgress, setSeedingInProgress] = useState(false);
-
-  // --- Filtros de Búsqueda (Directorio y Bolsa de Empleo) ---
   const [globalSearch, setGlobalSearch] = useState('');
   const [dirSearch, setDirSearch] = useState('');
   const [dirCategory, setDirCategory] = useState('todas');
-  const [dirSector, setDirSector] = useState('todos');
-  const [dirAvailability, setDirAvailability] = useState('todas');
-  const [dirOnlyWithPhotos, setDirOnlyWithPhotos] = useState(false);
-
-  const [jobSearch, setJobSearch] = useState('');
-  const [jobCategory, setJobCategory] = useState('todas');
-  const [jobTypeFilter, setJobTypeFilter] = useState('todos');
-  const [jobModalityFilter, setJobModalityFilter] = useState('todas');
-  const [jobShowClosed, setJobShowClosed] = useState(false);
-
-  // --- Modales Interactivos ---
   const [selectedWorker, setSelectedWorker] = useState(null);
-  const [lightboxImage, setLightboxImage] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
   const [isJobFormOpen, setIsJobFormOpen] = useState(false);
-  const [editingJob, setEditingJob] = useState(null);
-  const [reportModalData, setReportModalData] = useState(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState('login'); // 'login' | 'register' | 'recover'
-  const [deleteAccountConfirmOpen, setDeleteAccountConfirmOpen] = useState(false);
-  const [whatsappPreviewData, setWhatsappPreviewData] = useState(null);
-
-  // --- Notificaciones Toast ---
   const [toast, setToast] = useState(null);
 
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => {
-      setToast((prev) => (prev?.message === message ? null : prev));
-    }, 4200);
-  };
+  const showToast = (message) => { setToast({ message }); setTimeout(() => setToast(null), 3000); };
+  const effectiveUid = activePersonaUid || 'anon-user';
+  const myProfile = profiles.find((p) => p.uid === effectiveUid);
+  const approvedProfiles = profiles.filter((p) => p.status === 'approved');
+  
+  const filteredProfiles = approvedProfiles.filter(w => (dirCategory === 'todas' || w.category === dirCategory) && (!dirSearch || w.name.toLowerCase().includes(dirSearch.toLowerCase())));
+  const filteredJobs = jobPostings.filter(j => j.status === 'abierta');
+
+  return (
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans">
+      <header className="sticky top-0 z-30 bg-slate-900 text-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+          <button onClick={() => setActiveTab('inicio')} className="flex items-center gap-2 font-black text-xl"><div className="w-8 h-8 bg-blue-600 rounded flex justify-center items-center">LR</div> La Reliquia</button>
+          <nav className="hidden md:flex gap-4">
+            <button onClick={() => setActiveTab('inicio')} className={activeTab==='inicio'?'text-blue-400':'text-white'}>Inicio</button>
+            <button onClick={() => setActiveTab('directorio')} className={activeTab==='directorio'?'text-blue-400':'text-white'}>Directorio</button>
+            <button onClick={() => setActiveTab('empleos')} className={activeTab==='empleos'?'text-blue-400':'text-white'}>Empleos</button>
+            {isLoggedIn && <button onClick={() => setActiveTab('mi_panel')} className={activeTab==='mi_panel'?'text-blue-400':'text-white'}>Mi Panel</button>}
+          </nav>
+          <div>
+            {!isLoggedIn ? <button onClick={() => setAuthModalOpen(true)} className="bg-blue-600 px-4 py-2 rounded font-bold text-sm">Entrar</button> : <button onClick={() => setIsLoggedIn(false)} className="bg-red-600 px-4 py-2 rounded font-bold text-sm">Salir</button>}
+          </div>
+        </div>
+      </header>
+
+      {toast && <div className="fixed bottom-5 right-5 bg-slate-900 text-white p-4 rounded-xl z-50 shadow-xl">{toast.message}</div>}
+
+      <main className="flex-1">
+        {activeTab === 'inicio' && (
+          <div>
+            <div className="bg-slate-900 text-white py-16 text-center px-4">
+              <h1 className="text-4xl font-black mb-4">Talento local en <span className="text-blue-500">La Reliquia</span></h1>
+              <div className="max-w-md mx-auto flex gap-2"><input type="text" value={globalSearch} onChange={e=>setGlobalSearch(e.target.value)} className="w-full p-3 rounded text-black" placeholder="Buscar..."/><button onClick={()=>{setDirSearch(globalSearch); setActiveTab('directorio');}} className="bg-blue-600 px-6 font-bold rounded">Buscar</button></div>
+            </div>
+            <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+              {CATEGORIES.slice(0,6).map(c => (
+                <div key={c.id} onClick={()=>{setDirCategory(c.id); setActiveTab('directorio');}} className="bg-white p-6 rounded-xl shadow cursor-pointer border hover:border-blue-500">
+                  <c.icon className="w-8 h-8 text-blue-600 mb-2"/>
+                  <h3 className="font-bold">{c.name}</h3><p className="text-sm text-slate-500">{c.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'directorio' && (
+          <div className="max-w-7xl mx-auto px-4 py-10">
+            <h2 className="text-2xl font-black mb-6">Directorio de Trabajadores</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {filteredProfiles.map(w => (
+                <div key={w.id} className="bg-white p-5 rounded-xl shadow border">
+                  <h3 className="font-bold text-lg">{w.name} {w.verified && <CheckCircle2 className="inline w-4 text-blue-500"/>}</h3>
+                  <p className="text-blue-600 text-sm font-bold">{w.profession}</p>
+                  <p className="text-sm mt-2 text-slate-600">{w.bio}</p>
+                  <button onClick={() => setSelectedWorker(w)} className="mt-4 w-full bg-slate-100 py-2 rounded font-bold text-sm">Ver Perfil</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'empleos' && (
+          <div className="max-w-7xl mx-auto px-4 py-10">
+             <div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-black">Bolsa de Empleo</h2><button onClick={()=>setIsJobFormOpen(true)} className="bg-blue-600 text-white px-4 py-2 rounded font-bold text-sm">+ Vacante</button></div>
+             <div className="space-y-4">
+               {filteredJobs.map(j => (
+                 <div key={j.id} className="bg-white p-5 rounded-xl shadow border flex justify-between items-center">
+                   <div><h3 className="font-bold">{j.title}</h3><p className="text-blue-600 text-sm">{j.company}</p></div>
+                   <button onClick={() => setSelectedJob(j)} className="bg-slate-900 text-white px-4 py-2 rounded font-bold text-sm">Ver</button>
+                 </div>
+               ))}
+             </div>
+          </div>
+        )}
+
+        {activeTab === 'mi_panel' && (
+          <div className="max-w-3xl mx-auto px-4 py-10">
+            <h2 className="text-2xl font-black mb-6">Mi Perfil Profesional</h2>
+            <form onSubmit={e => {e.preventDefault(); showToast('Perfil Guardado Correctamente');}} className="bg-white p-6 rounded-xl shadow border space-y-4">
+               <input type="text" placeholder="Nombre completo" defaultValue={myProfile?.name} className="w-full p-2 border rounded" required/>
+               <input type="text" placeholder="Profesión" defaultValue={myProfile?.profession} className="w-full p-2 border rounded" required/>
+               <textarea placeholder="Descripción" defaultValue={myProfile?.bio} className="w-full p-2 border rounded" required/>
+               <label className="flex gap-2"><input type="checkbox" required defaultChecked={myProfile?.consentHabeasData}/> Acepto Ley 1581 (Habeas Data)</label>
+               <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded">Guardar Cambios</button>
+            </form>
+          </div>
+        )}
+      </main>
+
+      {/* Modales Básicos Integrados */}
+      {selectedWorker && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+            <h2 className="text-2xl font-black">{selectedWorker.name}</h2>
+            <p className="text-blue-600 font-bold mb-4">{selectedWorker.profession}</p>
+            <p className="text-slate-600 text-sm mb-6">{selectedWorker.bio}</p>
+            <div className="flex gap-2"><button onClick={()=>setSelectedWorker(null)} className="flex-1 bg-slate-200 py-2 rounded font-bold text-sm">Cerrar</button><button onClick={()=>{showToast('Abriendo WhatsApp...'); setSelectedWorker(null);}} className="flex-1 bg-green-600 text-white py-2 rounded font-bold text-sm">Contactar WhatsApp</button></div>
+          </div>
+        </div>
+      )}
+      
+      {selectedJob && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg">
+            <h2 className="text-xl font-black">{selectedJob.title}</h2>
+            <p className="text-blue-600 font-bold mb-2">{selectedJob.company}</p>
+            <p className="text-slate-600 text-sm mb-6">{selectedJob.description}</p>
+            <div className="flex gap-2"><button onClick={()=>setSelectedJob(null)} className="flex-1 bg-slate-200 py-2 rounded font-bold text-sm">Cerrar</button><button onClick={()=>{showToast('Postulación enviada exitosamente'); setSelectedJob(null);}} className="flex-1 bg-blue-600 text-white py-2 rounded font-bold text-sm">Enviar Postulación</button></div>
+          </div>
+        </div>
+      )}
+
+      {authModalOpen && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
+            <h2 className="text-xl font-black mb-4">Bienvenido a La Reliquia</h2>
+            <button onClick={()=>{setIsLoggedIn(true); setActiveTab('mi_panel'); setAuthModalOpen(false); showToast('Sesión Iniciada');}} className="w-full bg-blue-600 text-white font-bold py-3 rounded">Simular Ingreso Vecino</button>
+            <button onClick={()=>setAuthModalOpen(false)} className="w-full bg-slate-100 text-slate-700 font-bold py-2 rounded mt-2">Cancelar</button>
+          </div>
+        </div>
+      )}
+      
+      {isJobFormOpen && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-black mb-4">Publicar Vacante</h2>
+            <form onSubmit={e=>{e.preventDefault(); showToast('Vacante publicada'); setIsJobFormOpen(false);}}>
+              <input type="text" placeholder="Título del empleo" required className="w-full p-2 border rounded mb-3"/>
+              <button type="submit" className="w-full bg-blue-600 text-white font-bold py-2 rounded">Publicar</button>
+              <button type="button" onClick={()=>setIsJobFormOpen(false)} className="w-full bg-slate-100 font-bold py-2 rounded mt-2">Cancelar</button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 
   // ==========================================================================
   // REGLA FIREBASE 1 Y 3: Inicialización de Auth antes de cualquier consulta
