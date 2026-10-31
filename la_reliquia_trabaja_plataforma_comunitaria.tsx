@@ -1,21 +1,4 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { initializeApp } from 'firebase/app';
-import {
-  getAuth,
-  signInAnonymously,
-  signInWithCustomToken,
-  onAuthStateChanged
-} from 'firebase/auth';
-import {
-  getFirestore,
-  collection,
-  doc,
-  setDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  onSnapshot
-} from 'firebase/firestore';
 import {
   Search,
   Briefcase,
@@ -72,11 +55,7 @@ import {
 // ============================================================================
 // 1. CONFIGURACIÓN E INICIALIZACIÓN DE BASE DE DATOS EN TIEMPO REAL
 // ============================================================================
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'la-reliquia-trabaja-v1';
+
 
 // ============================================================================
 // 2. CATÁLOGOS OFICIALES DEL BARRIO LA RELIQUIA, VILLAVICENCIO
