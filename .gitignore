@@ -1,0 +1,14 @@
+# Dependencias y compilación
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Variables de entorno locales (la plantilla pública es .env.example)
+.env.local
+.env.*.local
+
+# Logs y archivos del sistema
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.netlify/
