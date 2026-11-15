@@ -1,4 +1,4 @@
-﻿import {
+import {
   useCallback,
   useEffect,
   useMemo,
@@ -165,19 +165,19 @@ function useEscapeKey(onClose: () => void) {
 }
 
 // ============================================================================
-// COMPONENTE PRINCIPAL DE LA APLICACIÃ“N
+// COMPONENTE PRINCIPAL DE LA APLICACIÓN
 // ============================================================================
 export default function App() {
-  // --- SesiÃ³n real (Supabase Auth) y rol de administrador (public.user_roles) ---
+  // --- Sesión real (Supabase Auth) y rol de administrador (public.user_roles) ---
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [authReady, setAuthReady] = useState<boolean>(!isSupabaseConfigured);
 
-  // --- NavegaciÃ³n ---
+  // --- Navegación ---
   const [activeTab, setActiveTabState] = useState<TabId>(readTabFromHash);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
-  // --- Datos sincronizados con Supabase (sin configuraciÃ³n: demostraciÃ³n de solo lectura) ---
+  // --- Datos sincronizados con Supabase (sin configuración: demostración de solo lectura) ---
   const [profiles, setProfiles] = useState<Profile[]>(isSupabaseConfigured ? [] : INITIAL_PROFILES);
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>(
     isSupabaseConfigured ? [] : INITIAL_PORTFOLIO
@@ -190,7 +190,7 @@ export default function App() {
   const [dataError, setDataError] = useState<string | null>(null);
   const loadRequestRef = useRef(0);
 
-  // --- Filtros de bÃºsqueda (Directorio y Bolsa de Empleo) ---
+  // --- Filtros de búsqueda (Directorio y Bolsa de Empleo) ---
   const [globalSearch, setGlobalSearch] = useState('');
   const [dirSearch, setDirSearch] = useState('');
   const [dirCategory, setDirCategory] = useState('todas');
@@ -231,7 +231,7 @@ export default function App() {
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);
 
-  /** Ejecuta una operaciÃ³n asÃ­ncrona; si falla muestra un aviso ROJO y devuelve undefined. */
+  /** Ejecuta una operación asíncrona; si falla muestra un aviso ROJO y devuelve undefined. */
   const runOp = useCallback(
     async <T,>(operation: () => Promise<T>, fallbackMessage: string): Promise<T | undefined> => {
       try {
@@ -246,7 +246,7 @@ export default function App() {
   );
 
   // ==========================================================================
-  // NAVEGACIÃ“N (con hash en la URL para que F5 conserve la secciÃ³n)
+  // NAVEGACIÓN (con hash en la URL para que F5 conserve la sección)
   // ==========================================================================
   const navigate = useCallback((tab: TabId, options?: { replace?: boolean }) => {
     setActiveTabState(tab);
@@ -286,7 +286,7 @@ export default function App() {
   }, []);
 
   // ==========================================================================
-  // AUTENTICACIÃ“N REAL
+  // AUTENTICACIÓN REAL
   // ==========================================================================
   useEffect(() => {
     if (!supabase) return;
@@ -318,7 +318,7 @@ export default function App() {
       .getSession()
       .then(({ data }) => applySession(data.session ? toSessionUser(data.session.user) : null))
       .catch((err) => {
-        console.error('[La Reliquia Trabaja] No se pudo recuperar la sesiÃ³n:', err);
+        console.error('[La Reliquia Trabaja] No se pudo recuperar la sesión:', err);
         if (!cancelled) setAuthReady(true);
       });
 
@@ -362,7 +362,7 @@ export default function App() {
     } catch (err) {
       if (requestId !== loadRequestRef.current) return;
       console.error('[La Reliquia Trabaja] Error cargando datos:', err);
-      setDataError(describeError(err, 'No se pudo cargar la informaciÃ³n de la comunidad.'));
+      setDataError(describeError(err, 'No se pudo cargar la información de la comunidad.'));
     } finally {
       if (requestId === loadRequestRef.current) setDataLoading(false);
     }
@@ -372,7 +372,7 @@ export default function App() {
     if (authReady) void reloadData();
   }, [authReady, reloadData]);
 
-  // ProtecciÃ³n de secciones privadas (tambiÃ©n las valida el servidor con RLS)
+  // Protección de secciones privadas (también las valida el servidor con RLS)
   useEffect(() => {
     if (!authReady) return;
     if (activeTab === 'mi_panel' && !sessionUser) {
@@ -380,7 +380,7 @@ export default function App() {
       openAuth('login');
     } else if ((activeTab === 'admin' || activeTab === 'arquitectura') && !isAdmin) {
       navigate('inicio', { replace: true });
-      if (!sessionUser) openAuth('login', 'Acceso reservado a la Junta de AcciÃ³n Comunal.');
+      if (!sessionUser) openAuth('login', 'Acceso reservado a la Junta de Acción Comunal.');
     }
   }, [authReady, activeTab, sessionUser, isAdmin, navigate, openAuth]);
 
@@ -388,10 +388,10 @@ export default function App() {
     const ok = await runOp(async () => {
       await signOutAccount();
       return true;
-    }, 'No se pudo cerrar la sesiÃ³n.');
+    }, 'No se pudo cerrar la sesión.');
     if (ok) {
       navigate('inicio');
-      showToast('SesiÃ³n cerrada correctamente');
+      showToast('Sesión cerrada correctamente');
     }
   }, [navigate, runOp, showToast]);
 
@@ -500,18 +500,18 @@ export default function App() {
     navigate('directorio');
   };
 
-  /** Si no hay sesiÃ³n abre el inicio de sesiÃ³n y devuelve false. */
+  /** Si no hay sesión abre el inicio de sesión y devuelve false. */
   const requireLogin = useCallback(
     (mode: AuthMode = 'login', hint?: string): boolean => {
       if (sessionUser) return true;
-      openAuth(mode, hint ?? 'Inicia sesiÃ³n para continuar.');
+      openAuth(mode, hint ?? 'Inicia sesión para continuar.');
       return false;
     },
     [openAuth, sessionUser]
   );
 
   const openNewJob = () => {
-    if (!requireLogin('login', 'Inicia sesiÃ³n para publicar una vacante.')) return;
+    if (!requireLogin('login', 'Inicia sesión para publicar una vacante.')) return;
     setEditingJob(null);
     setIsJobFormOpen(true);
   };
@@ -522,12 +522,12 @@ export default function App() {
   };
 
   // ==========================================================================
-  // OPERACIONES DE ESCRITURA (confirmadas por Supabase antes de mostrar Ã©xito)
+  // OPERACIONES DE ESCRITURA (confirmadas por Supabase antes de mostrar éxito)
   // ==========================================================================
   const guardWritable = (): boolean => {
     if (!isSupabaseConfigured) {
       showToast(
-        'Modo demostraciÃ³n: la plataforma no estÃ¡ conectada a Supabase, por eso no se puede guardar informaciÃ³n.',
+        'Modo demostración: la plataforma no está conectada a Supabase, por eso no se puede guardar información.',
         'error'
       );
       return false;
@@ -561,19 +561,19 @@ export default function App() {
     if (editingItem) {
       const updated = await runOp(
         () => updatePortfolioItem(sessionUser.id, editingItem, input, image),
-        'No se pudo actualizar la fotografÃ­a.'
+        'No se pudo actualizar la fotografía.'
       );
       if (!updated) return false;
       setPortfolioItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
       return true;
     }
     if (!image) {
-      showToast('Selecciona una fotografÃ­a antes de subirla.', 'error');
+      showToast('Selecciona una fotografía antes de subirla.', 'error');
       return false;
     }
     const created = await runOp(
       () => createPortfolioItem(sessionUser.id, profile, input, image),
-      'No se pudo subir la fotografÃ­a.'
+      'No se pudo subir la fotografía.'
     );
     if (!created) return false;
     setPortfolioItems((prev) => [created, ...prev]);
@@ -585,7 +585,7 @@ export default function App() {
     const ok = await runOp(async () => {
       await deletePortfolioItem(item);
       return true;
-    }, 'No se pudo eliminar la fotografÃ­a.');
+    }, 'No se pudo eliminar la fotografía.');
     if (!ok) return false;
     setPortfolioItems((prev) => prev.filter((i) => i.id !== item.id));
     return true;
@@ -605,9 +605,9 @@ export default function App() {
     setPortfolioItems((prev) => prev.filter((i) => i.profileId !== target.id));
     setDeleteTarget(null);
     setSelectedWorkerId((current) => (current === target.id ? null : current));
-    showToast(`El perfil Â«${target.name}Â» y sus fotografÃ­as fueron eliminados permanentemente.`);
+    showToast(`El perfil «${target.name}» y sus fotografías fueron eliminados permanentemente.`);
     if (isAdmin && target.ownerId !== sessionUser?.id) {
-      void recordAdminLog('ELIMINACIÃ“N DE PERFIL', 'profile', target.name, 'Perfil eliminado por moderaciÃ³n');
+      void recordAdminLog('ELIMINACIÓN DE PERFIL', 'profile', target.name, 'Perfil eliminado por moderación');
     }
   };
 
@@ -635,14 +635,14 @@ export default function App() {
     setJobPostings((prev) => prev.filter((j) => j.id !== job.id));
     setJobApplications((prev) => prev.filter((a) => a.jobId !== job.id));
     if (isAdmin && job.authorId !== sessionUser?.id) {
-      void recordAdminLog('ELIMINACIÃ“N DE VACANTE', 'job', job.title, `Vacante de ${job.company} eliminada`);
+      void recordAdminLog('ELIMINACIÓN DE VACANTE', 'job', job.title, `Vacante de ${job.company} eliminada`);
     }
     return true;
   };
 
   const handleApplyJob = async (input: ApplicationInput): Promise<boolean> => {
     if (!guardWritable() || !sessionUser) return false;
-    const created = await runOp(() => createApplication(sessionUser.id, input), 'No se pudo enviar la postulaciÃ³n.');
+    const created = await runOp(() => createApplication(sessionUser.id, input), 'No se pudo enviar la postulación.');
     if (!created) return false;
     setJobApplications((prev) => [created, ...prev]);
     return true;
@@ -656,12 +656,12 @@ export default function App() {
     return true;
   };
 
-  // ---- AdministraciÃ³n (el servidor rechaza cualquier acciÃ³n si no hay rol admin) ----
+  // ---- Administración (el servidor rechaza cualquier acción si no hay rol admin) ----
   const recordAdminLog = async (action: string, targetType: string, targetName: string, details: string) => {
     if (!sessionUser) return;
     const entry = await runOp(
       () => insertAdminLog(sessionUser, action, targetType, targetName, details),
-      'La acciÃ³n se aplicÃ³, pero no se pudo registrar en la auditorÃ­a.'
+      'La acción se aplicó, pero no se pudo registrar en la auditoría.'
     );
     if (entry) setAdminLogs((prev) => [entry, ...prev]);
   };
@@ -673,13 +673,13 @@ export default function App() {
     successMessage: string
   ) => {
     if (!isAdmin) {
-      showToast('Solo la Junta administradora puede realizar esta acciÃ³n.', 'error');
+      showToast('Solo la Junta administradora puede realizar esta acción.', 'error');
       return;
     }
     const ok = await runOp(async () => {
       await operation();
       return true;
-    }, 'No se pudo completar la acciÃ³n administrativa.');
+    }, 'No se pudo completar la acción administrativa.');
     if (!ok) return;
     apply();
     showToast(successMessage);
@@ -692,7 +692,7 @@ export default function App() {
       () => setProfiles((prev) => prev.map((x) => (x.id === p.id ? { ...x, status } : x))),
       {
         action:
-          status === 'approved' ? 'APROBACIÃ“N DE PERFIL' : status === 'suspended' ? 'SUSPENSIÃ“N DE PERFIL' : 'PERFIL EN REVISIÃ“N',
+          status === 'approved' ? 'APROBACIÓN DE PERFIL' : status === 'suspended' ? 'SUSPENSIÓN DE PERFIL' : 'PERFIL EN REVISIÓN',
         targetType: 'profile',
         targetName: p.name,
         details: `Cambio de estado a ${status}`
@@ -705,12 +705,12 @@ export default function App() {
       () => setProfileVerified(p.id, !p.verified),
       () => setProfiles((prev) => prev.map((x) => (x.id === p.id ? { ...x, verified: !p.verified } : x))),
       {
-        action: 'INSIGNIA VERIFICACIÃ“N',
+        action: 'INSIGNIA VERIFICACIÓN',
         targetType: 'profile',
         targetName: p.name,
-        details: `VerificaciÃ³n cambiada a ${!p.verified}`
+        details: `Verificación cambiada a ${!p.verified}`
       },
-      `VerificaciÃ³n de ${p.name} actualizada.`
+      `Verificación de ${p.name} actualizada.`
     );
 
   const handleSetPortfolioStatus = (item: PortfolioItem, status: 'approved' | 'flagged') =>
@@ -721,9 +721,9 @@ export default function App() {
         action: status === 'flagged' ? 'FOTO OCULTADA' : 'FOTO RESTAURADA',
         targetType: 'portfolio',
         targetName: item.title,
-        details: `Foto de ${item.workerName} ${status === 'flagged' ? 'ocultada' : 'restaurada'} por moderaciÃ³n`
+        details: `Foto de ${item.workerName} ${status === 'flagged' ? 'ocultada' : 'restaurada'} por moderación`
       },
-      status === 'flagged' ? 'FotografÃ­a ocultada al pÃºblico.' : 'FotografÃ­a restaurada.'
+      status === 'flagged' ? 'Fotografía ocultada al público.' : 'Fotografía restaurada.'
     );
 
   const handleAdminDeletePortfolio = (item: PortfolioItem) =>
@@ -731,12 +731,12 @@ export default function App() {
       () => deletePortfolioItem(item),
       () => setPortfolioItems((prev) => prev.filter((x) => x.id !== item.id)),
       {
-        action: 'MODERACIÃ“N FOTO',
+        action: 'MODERACIÓN FOTO',
         targetType: 'portfolio',
         targetName: item.title,
         details: `Eliminada foto de ${item.workerName}`
       },
-      'FotografÃ­a retirada por moderaciÃ³n.'
+      'Fotografía retirada por moderación.'
     );
 
   const handleToggleJobStatus = (job: JobPosting) => {
@@ -759,7 +759,7 @@ export default function App() {
       () => setReportStatus(report.id, status),
       () => setReports((prev) => prev.map((x) => (x.id === report.id ? { ...x, status } : x))),
       {
-        action: status === 'resuelto' ? 'RESOLUCIÃ“N DE REPORTE' : 'REPORTE DESCARTADO',
+        action: status === 'resuelto' ? 'RESOLUCIÓN DE REPORTE' : 'REPORTE DESCARTADO',
         targetType: report.targetType,
         targetName: report.targetTitle,
         details: `Reporte marcado como ${status}`
@@ -772,34 +772,34 @@ export default function App() {
       loadDemoData,
       () => undefined,
       {
-        action: 'CARGA DE DEMOSTRACIÃ“N',
+        action: 'CARGA DE DEMOSTRACIÓN',
         targetType: 'sistema',
-        targetName: 'Datos de demostraciÃ³n',
+        targetName: 'Datos de demostración',
         details: 'Se cargaron perfiles, fotos y vacantes ficticias de ejemplo.'
       },
-      'Datos de demostraciÃ³n cargados.'
+      'Datos de demostración cargados.'
     );
     await reloadData();
   };
 
   const handleRemoveDemo = async () => {
-    if (!window.confirm('Â¿Quitar todos los perfiles, fotos y vacantes de DEMOSTRACIÃ“N? Los datos reales no se tocan.')) return;
+    if (!window.confirm('¿Quitar todos los perfiles, fotos y vacantes de DEMOSTRACIÓN? Los datos reales no se tocan.')) return;
     await adminAction(
       removeDemoData,
       () => undefined,
       {
-        action: 'RETIRO DE DEMOSTRACIÃ“N',
+        action: 'RETIRO DE DEMOSTRACIÓN',
         targetType: 'sistema',
-        targetName: 'Datos de demostraciÃ³n',
+        targetName: 'Datos de demostración',
         details: 'Se eliminaron los perfiles, fotos y vacantes ficticias.'
       },
-      'Datos de demostraciÃ³n eliminados.'
+      'Datos de demostración eliminados.'
     );
     await reloadData();
   };
 
   // ==========================================================================
-  // NAVEGACIÃ“N PRINCIPAL
+  // NAVEGACIÓN PRINCIPAL
   // ==========================================================================
   const pendingProfilesCount = profiles.filter((p) => p.status === 'pending').length;
   const pendingReportsCount = reports.filter((r) => r.status === 'pendiente').length;
@@ -813,7 +813,7 @@ export default function App() {
       ? [
           {
             id: 'admin' as TabId,
-            label: 'AdministraciÃ³n',
+            label: 'Administración',
             icon: ShieldCheck,
             badge: pendingProfilesCount + pendingReportsCount
           },
@@ -834,14 +834,14 @@ export default function App() {
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-600 text-white">
               COMUNIDAD ACTIVA
             </span>
-            <span className="font-medium">Barrio La Reliquia â€¢ Villavicencio, Meta, Colombia</span>
+            <span className="font-medium">Barrio La Reliquia • Villavicencio, Meta, Colombia</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             {!isSupabaseConfigured && (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-500/40 font-semibold">
                 <AlertTriangle className="w-3.5 h-3.5" />
-                Modo demostraciÃ³n (sin base de datos)
+                Modo demostración (sin base de datos)
               </span>
             )}
             {isAdmin ? (
@@ -849,16 +849,16 @@ export default function App() {
                 type="button"
                 onClick={() => navigate('admin')}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-600 text-white shadow-sm transition-all"
-                title="Ir al panel de moderaciÃ³n de la Junta"
+                title="Ir al panel de moderación de la Junta"
               >
                 <ShieldCheck className="w-3.5 h-3.5" />
-                Junta: Panel de AdministraciÃ³n
+                Junta: Panel de Administración
               </button>
             ) : (
               !sessionUser && (
                 <button
                   type="button"
-                  onClick={() => openAuth('login', 'Acceso reservado a la Junta de AcciÃ³n Comunal. Inicia sesiÃ³n con tu cuenta autorizada.')}
+                  onClick={() => openAuth('login', 'Acceso reservado a la Junta de Acción Comunal. Inicia sesión con tu cuenta autorizada.')}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition-all"
                   title="Acceso para la Junta directiva"
                 >
@@ -871,7 +871,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* BARRA DE NAVEGACIÃ“N PRINCIPAL */}
+      {/* BARRA DE NAVEGACIÓN PRINCIPAL */}
       <header className="sticky top-0 z-30 bg-slate-900 text-white shadow-md border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
@@ -893,7 +893,7 @@ export default function App() {
               </div>
             </button>
 
-            <nav className="hidden lg:flex items-center gap-1.5" aria-label="NavegaciÃ³n principal">
+            <nav className="hidden lg:flex items-center gap-1.5" aria-label="Navegación principal">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = activeTab === item.id;
@@ -950,8 +950,8 @@ export default function App() {
                     type="button"
                     onClick={handleSignOut}
                     className="p-2 rounded-xl bg-slate-800 hover:bg-red-600 hover:text-white text-slate-300 transition-all"
-                    title="Cerrar SesiÃ³n"
-                    aria-label="Cerrar sesiÃ³n"
+                    title="Cerrar Sesión"
+                    aria-label="Cerrar sesión"
                   >
                     <LogOut className="w-4 h-4" />
                   </button>
@@ -963,7 +963,7 @@ export default function App() {
                     onClick={() => openAuth('login')}
                     className="px-3 py-2 rounded-xl text-slate-300 hover:text-white text-xs font-semibold transition-all"
                   >
-                    Iniciar SesiÃ³n
+                    Iniciar Sesión
                   </button>
                   <button
                     type="button"
@@ -982,7 +982,7 @@ export default function App() {
                 type="button"
                 onClick={() => setMobileMenuOpen((open) => !open)}
                 className="p-2.5 rounded-xl bg-slate-800 text-blue-400 hover:bg-slate-700 focus:outline-none"
-                aria-label={mobileMenuOpen ? 'Cerrar menÃº' : 'Abrir menÃº'}
+                aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
                 aria-expanded={mobileMenuOpen}
                 aria-controls="menu-movil"
               >
@@ -999,7 +999,7 @@ export default function App() {
           >
             {sessionUser && (
               <p className="px-1 pb-1 text-xs text-slate-400">
-                SesiÃ³n: <strong className="text-slate-200">{sessionUser.displayName}</strong>
+                Sesión: <strong className="text-slate-200">{sessionUser.displayName}</strong>
               </p>
             )}
             {navItems.map((item) => {
@@ -1051,7 +1051,7 @@ export default function App() {
                   className="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-red-600 text-white font-semibold text-xs flex items-center justify-center gap-1.5"
                 >
                   <LogOut className="w-4 h-4" />
-                  Cerrar SesiÃ³n
+                  Cerrar Sesión
                 </button>
               ) : (
                 <>
@@ -1061,7 +1061,7 @@ export default function App() {
                     className="w-full py-2.5 px-3 rounded-xl bg-slate-800 text-white font-semibold text-xs flex items-center justify-center gap-1.5"
                   >
                     <KeyRound className="w-4 h-4 text-blue-400" />
-                    Iniciar SesiÃ³n
+                    Iniciar Sesión
                   </button>
                   <button
                     type="button"
@@ -1073,7 +1073,7 @@ export default function App() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => openAuth('login', 'Acceso reservado a la Junta de AcciÃ³n Comunal. Inicia sesiÃ³n con tu cuenta autorizada.')}
+                    onClick={() => openAuth('login', 'Acceso reservado a la Junta de Acción Comunal. Inicia sesión con tu cuenta autorizada.')}
                     className="w-full py-2.5 px-3 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 font-semibold text-xs flex items-center justify-center gap-1.5"
                   >
                     <ShieldCheck className="w-4 h-4 text-blue-400" />
@@ -1109,12 +1109,12 @@ export default function App() {
         <div className="bg-blue-50 border-b border-blue-200 text-blue-900 px-4 py-2 text-xs font-semibold">
           <div className="max-w-7xl mx-auto flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
-            Cargando informaciÃ³n de la comunidadâ€¦
+            Cargando información de la comunidad…
           </div>
         </div>
       )}
 
-      {/* NOTIFICACIÃ“N TOAST FLOTANTE */}
+      {/* NOTIFICACIÓN TOAST FLOTANTE */}
       {toast && (
         <div
           role={toast.type === 'error' ? 'alert' : 'status'}
@@ -1141,7 +1141,7 @@ export default function App() {
         </div>
       )}
 
-      {/* CONTENIDO PRINCIPAL DINÃMICO SEGÃšN PESTAÃ‘A */}
+      {/* CONTENIDO PRINCIPAL DINÁMICO SEGÚN PESTAÑA */}
       <main className="flex-1">
         {activeTab === 'inicio' && (
           <HomeView
@@ -1236,7 +1236,7 @@ export default function App() {
             jobPostings={jobPostings}
             reports={reports}
             adminLogs={adminLogs}
-            onOpenLogin={() => openAuth('login', 'Acceso reservado a la Junta de AcciÃ³n Comunal.')}
+            onOpenLogin={() => openAuth('login', 'Acceso reservado a la Junta de Acción Comunal.')}
             onOpenWorker={(w) => setSelectedWorkerId(w.id)}
             onOpenJob={(j) => setSelectedJobId(j.id)}
             onLoadDemo={handleLoadDemo}
@@ -1248,7 +1248,7 @@ export default function App() {
             onDeletePortfolio={handleAdminDeletePortfolio}
             onToggleJobStatus={handleToggleJobStatus}
             onDeleteJob={async (job) => {
-              if (!window.confirm(`Â¿Eliminar definitivamente la vacante Â«${job.title}Â»?`)) return;
+              if (!window.confirm(`¿Eliminar definitivamente la vacante «${job.title}»?`)) return;
               const ok = await handleDeleteJobByOwner(job);
               if (ok) showToast('Vacante eliminada.');
             }}
@@ -1259,7 +1259,7 @@ export default function App() {
         {activeTab === 'arquitectura' && isAdmin && <TechnicalArchitectureView showToast={showToast} />}
       </main>
 
-      {/* PIE DE PÃGINA INSTITUCIONAL Y CUMPLIMIENTO REGULATORIO COLOMBIANO */}
+      {/* PIE DE PÁGINA INSTITUCIONAL Y CUMPLIMIENTO REGULATORIO COLOMBIANO */}
       <footer className="bg-slate-950 text-slate-200 border-t-4 border-blue-600 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
@@ -1275,25 +1275,25 @@ export default function App() {
               </div>
               <p className="text-sm text-slate-400 leading-relaxed max-w-xl">
                 Plataforma comunitaria de directorio de oficios, emprendimientos y bolsa de empleo local para los
-                habitantes del barrio La Reliquia, Villavicencio, Meta, Colombia. Impulsando la economÃ­a popular y el
+                habitantes del barrio La Reliquia, Villavicencio, Meta, Colombia. Impulsando la economía popular y el
                 trabajo digno entre vecinos.
               </p>
               <div className="flex flex-wrap gap-2 pt-1 text-xs text-slate-400">
                 <span className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800">
-                  ðŸ“ Comuna 4 â€¢ Villavicencio, Meta
+                  📍 Comuna 4 • Villavicencio, Meta
                 </span>
                 <span className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800">
-                  ðŸ”’ ProtecciÃ³n Ley 1581 de 2012
+                  🔒 Protección Ley 1581 de 2012
                 </span>
               </div>
             </div>
 
             <div>
-              <h4 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-3">NavegaciÃ³n RÃ¡pida</h4>
+              <h4 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-3">Navegación Rápida</h4>
               <ul className="space-y-2 text-sm">
                 <li>
                   <button type="button" onClick={() => navigate('inicio')} className="hover:text-blue-300 transition-colors">
-                    PÃ¡gina Principal
+                    Página Principal
                   </button>
                 </li>
                 <li>
@@ -1314,7 +1314,7 @@ export default function App() {
                 {isAdmin && (
                   <li>
                     <button type="button" onClick={() => navigate('arquitectura')} className="hover:text-blue-300 transition-colors">
-                      DocumentaciÃ³n TÃ©cnica (Junta)
+                      Documentación Técnica (Junta)
                     </button>
                   </li>
                 )}
@@ -1326,23 +1326,23 @@ export default function App() {
               <div className="space-y-2.5 text-xs text-slate-400 leading-relaxed">
                 <p>
                   <strong className="text-white">Habeas Data (Ley 1581 de 2012):</strong> Todo habitante controla la
-                  publicaciÃ³n de su perfil, fotografÃ­as y nÃºmero de WhatsApp, con derecho permanente a actualizar o
+                  publicación de su perfil, fotografías y número de WhatsApp, con derecho permanente a actualizar o
                   suprimir su cuenta.
                 </p>
                 <p>
                   <strong className="text-white">Aviso Regulatorio (Ley 1636 de 2013):</strong> Esta plataforma opera
                   como un directorio comunitario gratuito de contacto vecinal directo y cartelera informativa; no
-                  realiza cobros ni intermediaciÃ³n laboral comercial sin autorizaciÃ³n del Ministerio del Trabajo / SPE.
+                  realiza cobros ni intermediación laboral comercial sin autorización del Ministerio del Trabajo / SPE.
                 </p>
               </div>
             </div>
           </div>
 
           <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-            <p>Â© {new Date().getFullYear()} Proyecto Comunitario La Reliquia Trabaja â€” Villavicencio, Meta, Colombia.</p>
+            <p>© {new Date().getFullYear()} Proyecto Comunitario La Reliquia Trabaja — Villavicencio, Meta, Colombia.</p>
             <div className="flex items-center gap-4">
               <button type="button" onClick={() => setPolicyOpen(true)} className="underline hover:text-blue-400">
-                PolÃ­tica de Tratamiento de Datos
+                Política de Tratamiento de Datos
               </button>
             </div>
           </div>
@@ -1386,7 +1386,7 @@ export default function App() {
           applications={jobApplications.filter((a) => a.jobId === selectedJob.id)}
           showToast={showToast}
           onClose={() => setSelectedJobId(null)}
-          onRequireLogin={() => openAuth('login', 'Inicia sesiÃ³n para postularte a esta vacante.')}
+          onRequireLogin={() => openAuth('login', 'Inicia sesión para postularte a esta vacante.')}
           onEditJob={(j) => {
             setSelectedJobId(null);
             setEditingJob(j);
@@ -1458,7 +1458,7 @@ export default function App() {
 }
 
 // ============================================================================
-// VENTANA: ELIMINAR PERFIL (Derecho de supresiÃ³n - Ley 1581 de 2012)
+// VENTANA: ELIMINAR PERFIL (Derecho de supresión - Ley 1581 de 2012)
 // ============================================================================
 interface DeleteProfileModalProps {
   profile: Profile;
@@ -1483,13 +1483,13 @@ function DeleteProfileModal({ profile, byModerator, deleting, onCancel, onConfir
         </div>
         <h3 id="delete-profile-title" className="text-lg font-extrabold text-slate-900">
           {byModerator
-            ? `Â¿Eliminar definitivamente el perfil de ${profile.name}?`
-            : `Â¿Confirmas la eliminaciÃ³n definitiva del perfil Â«${profile.name}Â» y su portafolio?`}
+            ? `¿Eliminar definitivamente el perfil de ${profile.name}?`
+            : `¿Confirmas la eliminación definitiva del perfil «${profile.name}» y su portafolio?`}
         </h3>
         <p className="text-sm text-slate-600 mt-2 leading-relaxed">
           {byModerator
-            ? 'AcciÃ³n de moderaciÃ³n: se eliminarÃ¡ el perfil del directorio y todas las fotografÃ­as de su portafolio. QuedarÃ¡ registrada en la auditorÃ­a.'
-            : 'En cumplimiento del derecho de supresiÃ³n (Habeas Data - Ley 1581 de 2012), esta acciÃ³n eliminarÃ¡ este perfil profesional del directorio de La Reliquia y borrarÃ¡ todas las fotografÃ­as de su portafolio. No se puede deshacer.'}
+            ? 'Acción de moderación: se eliminará el perfil del directorio y todas las fotografías de su portafolio. Quedará registrada en la auditoría.'
+            : 'En cumplimiento del derecho de supresión (Habeas Data - Ley 1581 de 2012), esta acción eliminará este perfil profesional del directorio de La Reliquia y borrará todas las fotografías de su portafolio. No se puede deshacer.'}
         </p>
         <div className="mt-6 flex items-center justify-end gap-3">
           <button
@@ -1507,7 +1507,7 @@ function DeleteProfileModal({ profile, byModerator, deleting, onCancel, onConfir
             className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold inline-flex items-center gap-2 disabled:opacity-60"
           >
             {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
-            {byModerator ? 'SÃ­, eliminar perfil' : 'SÃ­, eliminar mis datos'}
+            {byModerator ? 'Sí, eliminar perfil' : 'Sí, eliminar mis datos'}
           </button>
         </div>
       </div>
@@ -1516,7 +1516,7 @@ function DeleteProfileModal({ profile, byModerator, deleting, onCancel, onConfir
 }
 
 // ============================================================================
-// VENTANA: VISOR AMPLIADO DE FOTOGRAFÃAS DEL PORTAFOLIO
+// VENTANA: VISOR AMPLIADO DE FOTOGRAFÍAS DEL PORTAFOLIO
 // ============================================================================
 function LightboxModal({ image, onClose }: { image: PortfolioItem; onClose: () => void }) {
   useEscapeKey(onClose);
@@ -1547,7 +1547,7 @@ function LightboxModal({ image, onClose }: { image: PortfolioItem; onClose: () =
         </div>
         <div className="px-6 py-4 bg-slate-950 text-slate-300 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <p>{image.description}</p>
-          <span className="text-xs text-slate-500 shrink-0">Formato verificado â€¢ {image.fileSizeKB} KB</span>
+          <span className="text-xs text-slate-500 shrink-0">Formato verificado • {image.fileSizeKB} KB</span>
         </div>
       </div>
     </div>
@@ -1556,7 +1556,7 @@ function LightboxModal({ image, onClose }: { image: PortfolioItem; onClose: () =
 
 
 // ============================================================================
-// VISTA 1: PÃGINA PRINCIPAL (INICIO)
+// VISTA 1: PÁGINA PRINCIPAL (INICIO)
 // ============================================================================
 function HomeView({
   approvedProfiles,
@@ -1586,7 +1586,7 @@ function HomeView({
             <div className="lg:col-span-7 space-y-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-blue-400 text-xs font-bold">
                 <MapPin className="w-3.5 h-3.5" />
-                <span>PLATAFORMA OFICIAL COMUNITARIA â€¢ BARRIO LA RELIQUIA, VILLAVICENCIO</span>
+                <span>PLATAFORMA OFICIAL COMUNITARIA • BARRIO LA RELIQUIA, VILLAVICENCIO</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
@@ -1594,7 +1594,7 @@ function HomeView({
               </h1>
 
               <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl">
-                Encuentra maestros de obra, modistas, mecÃ¡nicos, tÃ©cnicos, gastronomÃ­a llanera y emprendimientos dentro del barrio La Reliquia, o postÃºlate a las vacantes locales sin intermediarios.
+                Encuentra maestros de obra, modistas, mecánicos, técnicos, gastronomía llanera y emprendimientos dentro del barrio La Reliquia, o postúlate a las vacantes locales sin intermediarios.
               </p>
 
               {/* Buscador General Unificado */}
@@ -1608,7 +1608,7 @@ function HomeView({
                     type="text"
                     value={globalSearch}
                     onChange={(e) => setGlobalSearch(e.target.value)}
-                    placeholder="Â¿QuÃ© necesitas hoy? Ej: Maestro de obra, modista, electricista..."
+                    placeholder="¿Qué necesitas hoy? Ej: Maestro de obra, modista, electricista..."
                     className="w-full text-slate-900 placeholder-slate-400 text-sm sm:text-base focus:outline-none"
                   />
                 </div>
@@ -1620,7 +1620,7 @@ function HomeView({
                 </button>
               </form>
 
-              {/* Botones Principales de AcciÃ³n */}
+              {/* Botones Principales de Acción */}
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <button
                   onClick={onOpenRegister}
@@ -1698,7 +1698,7 @@ function HomeView({
                       Trato directo y sin comisiones
                     </p>
                     <p className="mt-0.5 text-slate-400">
-                      Contacta por WhatsApp directamente a los trabajadores que han autorizado mostrar su nÃºmero conforme a la Ley 1581 de 2012.
+                      Contacta por WhatsApp directamente a los trabajadores que han autorizado mostrar su número conforme a la Ley 1581 de 2012.
                     </p>
                   </div>
                 </div>
@@ -1708,7 +1708,7 @@ function HomeView({
         </div>
       </section>
 
-      {/* SECCIÃ“N DE CATEGORÃAS DE TRABAJADORES Y SERVICIOS */}
+      {/* SECCIÓN DE CATEGORÍAS DE TRABAJADORES Y SERVICIOS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
@@ -1716,10 +1716,10 @@ function HomeView({
               DIRECTORIO POR OFICIOS
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
-              CategorÃ­as de Trabajadores y Servicios
+              Categorías de Trabajadores y Servicios
             </h2>
             <p className="text-sm text-slate-600 mt-1">
-              Selecciona una categorÃ­a para explorar los perfiles y portafolios fotogrÃ¡ficos del barrio.
+              Selecciona una categoría para explorar los perfiles y portafolios fotográficos del barrio.
             </p>
           </div>
           <button
@@ -1771,7 +1771,7 @@ function HomeView({
         </div>
       </section>
 
-      {/* SECCIÃ“N DE TRABAJADORES DESTACADOS EN LA RELIQUIA */}
+      {/* SECCIÓN DE TRABAJADORES DESTACADOS EN LA RELIQUIA */}
       <section className="bg-white border-y border-slate-200 py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
@@ -1783,7 +1783,7 @@ function HomeView({
                 Trabajadores y Emprendimientos Destacados
               </h2>
               <p className="text-sm text-slate-600 mt-1">
-                Conoce la experiencia y fotografÃ­as reales de los trabajos realizados por tus vecinos.
+                Conoce la experiencia y fotografías reales de los trabajos realizados por tus vecinos.
               </p>
             </div>
             <button
@@ -1821,7 +1821,7 @@ function HomeView({
                         {workerPhotos.length} {workerPhotos.length === 1 ? 'foto' : 'fotos'}
                       </span>
                       <p className="absolute bottom-2.5 left-3 right-3 text-xs text-blue-300 font-semibold truncate">
-                        ðŸ“· {workerPhotos[0].title}
+                        📷 {workerPhotos[0].title}
                       </p>
                     </div>
                   ) : (
@@ -1863,9 +1863,9 @@ function HomeView({
                           <MapPin className="w-3.5 h-3.5 text-blue-700" />
                           {worker.sector}
                         </span>
-                        <span>â€¢</span>
+                        <span>•</span>
                         <span className="font-semibold text-blue-800">
-                          {worker.experienceYears} aÃ±os exp.
+                          {worker.experienceYears} años exp.
                         </span>
                       </div>
 
@@ -1904,12 +1904,12 @@ function HomeView({
         </div>
       </section>
 
-      {/* SECCIÃ“N DE OPORTUNIDADES RECIENTES EN LA BOLSA DE EMPLEO */}
+      {/* SECCIÓN DE OPORTUNIDADES RECIENTES EN LA BOLSA DE EMPLEO */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
             <span className="text-xs font-extrabold uppercase tracking-wider text-blue-900 bg-blue-100 px-3 py-1 rounded-full">
-              CONTRATACIÃ“N LOCAL
+              CONTRATACIÓN LOCAL
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
               Oportunidades Laborales Recientes
@@ -1948,7 +1948,7 @@ function HomeView({
                       {cat.name}
                     </span>
                     <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-800">
-                      â— Vacante Abierta
+                      ● Vacante Abierta
                     </span>
                   </div>
 
@@ -1975,7 +1975,7 @@ function HomeView({
                     </div>
                     <div className="flex items-center gap-1.5 col-span-2 font-bold text-blue-900">
                       <DollarSign className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                      <span>RemuneraciÃ³n: {job.salaryCOP || 'A convenir'}</span>
+                      <span>Remuneración: {job.salaryCOP || 'A convenir'}</span>
                     </div>
                   </div>
                 </div>
@@ -1997,20 +1997,20 @@ function HomeView({
         </div>
       </section>
 
-      {/* BANNER INSTITUCIONAL DE PROTECCIÃ“N DE DATOS Y MARCO REGULATORIO COLOMBIANO */}
+      {/* BANNER INSTITUCIONAL DE PROTECCIÓN DE DATOS Y MARCO REGULATORIO COLOMBIANO */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
         <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 border-2 border-blue-600/80 shadow-lg">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
             <div className="lg:col-span-8 space-y-2">
               <div className="inline-flex items-center gap-2 text-blue-400 font-extrabold text-xs uppercase tracking-wider">
                 <Scale className="w-4 h-4" />
-                <span>Seguridad JurÃ­dica y ProtecciÃ³n de Datos en Colombia</span>
+                <span>Seguridad Jurídica y Protección de Datos en Colombia</span>
               </div>
               <h3 className="text-xl font-black">
                 Compromiso con la Ley 1581 de 2012 (Habeas Data) y Normativa Laboral
               </h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                En <strong>La Reliquia Trabaja</strong> ningÃºn nÃºmero telefÃ³nico ni fotografÃ­a se publica sin el consentimiento libre, previo y expreso de su titular. AdemÃ¡s, informamos a la comunidad que esta plataforma funciona como un directorio vecinal gratuito de auto-publicaciÃ³n; para operar servicios formales de gestiÃ³n y colocaciÃ³n de empleo se debe revisar la autorizaciÃ³n ante el <strong>Ministerio del Trabajo / Unidad del Servicio PÃºblico de Empleo (Ley 1636 de 2013)</strong>.
+                En <strong>La Reliquia Trabaja</strong> ningún número telefónico ni fotografía se publica sin el consentimiento libre, previo y expreso de su titular. Además, informamos a la comunidad que esta plataforma funciona como un directorio vecinal gratuito de auto-publicación; para operar servicios formales de gestión y colocación de empleo se debe revisar la autorización ante el <strong>Ministerio del Trabajo / Unidad del Servicio Público de Empleo (Ley 1636 de 2013)</strong>.
               </p>
             </div>
             <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-2.5">
@@ -2025,7 +2025,7 @@ function HomeView({
                 onClick={onOpenPolicy}
                 className="w-full py-3 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold text-xs text-center"
               >
-                Leer la PolÃ­tica de Tratamiento de Datos
+                Leer la Política de Tratamiento de Datos
               </button>
             </div>
           </div>
@@ -2079,7 +2079,7 @@ function DirectoryView({
         </button>
       </div>
 
-      {/* Barra de BÃºsqueda y Filtros */}
+      {/* Barra de Búsqueda y Filtros */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mb-8 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div className="md:col-span-5 relative">
@@ -2088,7 +2088,7 @@ function DirectoryView({
               type="text"
               value={dirSearch}
               onChange={(e) => setDirSearch(e.target.value)}
-              placeholder="Buscar por nombre, profesiÃ³n o habilidad (ej. enchape, moto, costura)..."
+              placeholder="Buscar por nombre, profesión o habilidad (ej. enchape, moto, costura)..."
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
             />
           </div>
@@ -2099,7 +2099,7 @@ function DirectoryView({
               onChange={(e) => setDirCategory(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:border-blue-600"
             >
-              <option value="todas">Todas las categorÃ­as</option>
+              <option value="todas">Todas las categorías</option>
               {CATEGORIES.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -2147,7 +2147,7 @@ function DirectoryView({
               onChange={(e) => setDirOnlyWithPhotos(e.target.checked)}
               className="rounded text-blue-600 focus:ring-blue-600 w-4 h-4"
             />
-            <span>Mostrar Ãºnicamente perfiles con fotografÃ­as de trabajos en su portafolio</span>
+            <span>Mostrar únicamente perfiles con fotografías de trabajos en su portafolio</span>
           </label>
 
           <div className="flex items-center gap-3 text-xs">
@@ -2181,10 +2181,10 @@ function DirectoryView({
         <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
           <Users className="w-12 h-12 text-slate-400 mx-auto mb-3" />
           <h3 className="text-lg font-extrabold text-slate-800">
-            No encontramos trabajadores con esos filtros especÃ­ficos
+            No encontramos trabajadores con esos filtros específicos
           </h3>
           <p className="text-sm text-slate-600 mt-1 max-w-md mx-auto">
-            Intenta ampliar tu bÃºsqueda a todos los sectores de La Reliquia o registra tu propio perfil si ofreces este servicio.
+            Intenta ampliar tu búsqueda a todos los sectores de La Reliquia o registra tu propio perfil si ofreces este servicio.
           </p>
         </div>
       ) : (
@@ -2205,7 +2205,7 @@ function DirectoryView({
                       {cat.name}
                     </span>
                     <span className="text-slate-300 font-medium shrink-0">
-                      {worker.experienceYears} aÃ±os exp.
+                      {worker.experienceYears} años exp.
                     </span>
                   </div>
 
@@ -2297,10 +2297,10 @@ function DirectoryView({
                   ) : (
                     <span
                       className="py-2 px-2.5 rounded-xl bg-slate-200 text-slate-600 font-semibold text-[11px] inline-flex items-center gap-1"
-                      title="El trabajador reservÃ³ su nÃºmero telefÃ³nico pÃºblico (Ley 1581)"
+                      title="El trabajador reservó su número telefónico público (Ley 1581)"
                     >
                       <Lock className="w-3 h-3" />
-                      TelÃ©fono Privado
+                      Teléfono Privado
                     </span>
                   )}
                 </div>
@@ -2379,7 +2379,7 @@ function JobsBoardView({
               onChange={(e) => setJobCategory(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:border-blue-600"
             >
-              <option value="todas">Todas las categorÃ­as</option>
+              <option value="todas">Todas las categorías</option>
               {CATEGORIES.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -2427,7 +2427,7 @@ function JobsBoardView({
               onChange={(e) => setJobShowClosed(e.target.checked)}
               className="rounded text-blue-600 focus:ring-blue-600 w-4 h-4"
             />
-            <span>Incluir tambiÃ©n convocatorias cerradas en el listado</span>
+            <span>Incluir también convocatorias cerradas en el listado</span>
           </label>
           <span className="text-slate-500 font-semibold">
             {filteredJobs.length} vacantes encontradas
@@ -2442,7 +2442,7 @@ function JobsBoardView({
             <Briefcase className="w-12 h-12 text-slate-400 mx-auto mb-3" />
             <h3 className="text-lg font-extrabold text-slate-800">No hay vacantes con esos filtros</h3>
             <p className="text-sm text-slate-600 mt-1 max-w-md mx-auto">
-              Prueba con otra bÃºsqueda, incluye las convocatorias cerradas o publica tu propia oferta de empleo.
+              Prueba con otra búsqueda, incluye las convocatorias cerradas o publica tu propia oferta de empleo.
             </p>
           </div>
         )}
@@ -2468,10 +2468,10 @@ function JobsBoardView({
                         : 'bg-slate-200 text-slate-700'
                     }`}
                   >
-                    {isOpen ? 'â— Convocatoria Abierta' : 'Convocatoria Cerrada'}
+                    {isOpen ? '● Convocatoria Abierta' : 'Convocatoria Cerrada'}
                   </span>
                   <span className="text-xs text-slate-500">
-                    Publicada: {formatDate(job.publishedAt)} â€¢ Cierra: {formatDate(job.closingDate)}
+                    Publicada: {formatDate(job.publishedAt)} • Cierra: {formatDate(job.closingDate)}
                   </span>
                 </div>
 
@@ -2529,9 +2529,9 @@ function JobsBoardView({
 }
 
 // ============================================================================
-// VISTA 4: MI PANEL â€” PERFILES PROFESIONALES, PORTAFOLIO FOTOGRÃFICO Y PRIVACIDAD LEY 1581
-// SeparaciÃ³n clara entre "Crear un perfil nuevo" y "Editar un perfil existente":
-//   * Crear  -> formulario vacÃ­o; cada guardado genera un perfil NUEVO con id Ãºnico
+// VISTA 4: MI PANEL — PERFILES PROFESIONALES, PORTAFOLIO FOTOGRÁFICO Y PRIVACIDAD LEY 1581
+// Separación clara entre "Crear un perfil nuevo" y "Editar un perfil existente":
+//   * Crear  -> formulario vacío; cada guardado genera un perfil NUEVO con id único
 //              y el formulario se limpia por completo al terminar.
 //   * Editar -> carga SOLO el perfil elegido en "Mis perfiles"; nunca crea duplicados.
 // ============================================================================
@@ -2559,7 +2559,7 @@ interface MyDashboardViewProps {
 type ProfileSelection = { mode: 'create' } | { mode: 'edit'; profileId: string };
 
 const PROFILE_STATUS_LABEL: Record<ProfileStatus, { label: string; className: string }> = {
-  pending: { label: 'En revisiÃ³n de la Junta', className: 'bg-amber-100 text-amber-900' },
+  pending: { label: 'En revisión de la Junta', className: 'bg-amber-100 text-amber-900' },
   approved: { label: 'Publicado', className: 'bg-green-100 text-green-800' },
   suspended: { label: 'Suspendido', className: 'bg-red-100 text-red-800' }
 };
@@ -2584,7 +2584,7 @@ function MyDashboardView({
   const [createCounter, setCreateCounter] = useState(0);
   const [lastCreated, setLastCreated] = useState<Profile | null>(null);
 
-  // SelecciÃ³n efectiva: lo que eligiÃ³ la persona o, por defecto, su primer perfil (o "crear" si no tiene).
+  // Selección efectiva: lo que eligió la persona o, por defecto, su primer perfil (o "crear" si no tiene).
   const selection: ProfileSelection = useMemo(() => {
     if (userSelection?.mode === 'create') return userSelection;
     if (userSelection?.mode === 'edit') {
@@ -2605,14 +2605,14 @@ function MyDashboardView({
       setCreateCounter((count) => count + 1); // nueva "key" => formulario completamente limpio
       showToast(
         created.status === 'approved'
-          ? `Â¡Perfil Â«${created.name}Â» creado y publicado en el directorio!`
-          : `Â¡Perfil Â«${created.name}Â» creado! AparecerÃ¡ en el directorio cuando la Junta lo apruebe.`
+          ? `¡Perfil «${created.name}» creado y publicado en el directorio!`
+          : `¡Perfil «${created.name}» creado! Aparecerá en el directorio cuando la Junta lo apruebe.`
       );
       return true;
     }
     const updated = await onUpdateProfile(selection.profileId, input);
     if (!updated) return false;
-    showToast(`Cambios del perfil Â«${updated.name}Â» guardados correctamente.`);
+    showToast(`Cambios del perfil «${updated.name}» guardados correctamente.`);
     return true;
   };
 
@@ -2641,7 +2641,7 @@ function MyDashboardView({
             </span>
             <h1 className="text-2xl sm:text-3xl font-black">Hola, {user.displayName || 'Vecino'}</h1>
             <p className="text-sm text-slate-300 mt-1">
-              Administra tus perfiles de oficio y sube fotografÃ­as de tus mejores trabajos.
+              Administra tus perfiles de oficio y sube fotografías de tus mejores trabajos.
             </p>
           </div>
         </div>
@@ -2653,7 +2653,7 @@ function MyDashboardView({
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-sm shrink-0 shadow-sm transition-all"
           >
             <Eye className="w-4 h-4" />
-            Ver mi perfil pÃºblico
+            Ver mi perfil público
           </button>
         )}
       </div>
@@ -2708,7 +2708,7 @@ function MyDashboardView({
 
               {myProfiles.length === 0 ? (
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  AÃºn no tienes perfiles publicados. Completa el formulario para aparecer en el directorio de La
+                  Aún no tienes perfiles publicados. Completa el formulario para aparecer en el directorio de La
                   Reliquia.
                 </p>
               ) : (
@@ -2743,7 +2743,7 @@ function MyDashboardView({
                             type="button"
                             onClick={() => onOpenWorkerPreview(profile)}
                             className="p-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100"
-                            title="Ver como lo ve el pÃºblico"
+                            title="Ver como lo ve el público"
                             aria-label={`Ver perfil de ${profile.name}`}
                           >
                             <Eye className="w-3.5 h-3.5" />
@@ -2772,17 +2772,17 @@ function MyDashboardView({
               <div role="status" className="mb-6 p-4 rounded-2xl bg-green-50 border border-green-200 text-sm text-green-900 flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-extrabold">Perfil Â«{lastCreated.name}Â» guardado.</p>
+                  <p className="font-extrabold">Perfil «{lastCreated.name}» guardado.</p>
                   <p className="text-xs mt-0.5">
-                    El formulario quedÃ³ limpio por si quieres registrar otro perfil distinto. Puedes encontrar el que
-                    acabas de crear en Â«Mis perfilesÂ».
+                    El formulario quedó limpio por si quieres registrar otro perfil distinto. Puedes encontrar el que
+                    acabas de crear en «Mis perfiles».
                   </p>
                 </div>
               </div>
             )}
 
             {selection.mode === 'edit' && !editingProfile ? (
-              <p className="text-sm text-slate-500">Cargando tu perfilâ€¦</p>
+              <p className="text-sm text-slate-500">Cargando tu perfil…</p>
             ) : (
               <ProfileForm
                 key={selection.mode === 'create' ? `crear-${createCounter}` : `editar-${selection.profileId}`}
@@ -2897,9 +2897,9 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
       fail('Debes autorizar el tratamiento de datos personales (Ley 1581 de 2012) para publicar tu perfil.');
       return;
     }
-    if (form.name.trim().length < 3) return fail('Escribe el nombre completo (mÃ­nimo 3 letras).');
-    if (form.profession.trim().length < 2) return fail('Escribe la profesiÃ³n u oficio.');
-    if (form.bio.trim().length < 10) return fail('La descripciÃ³n de servicios debe tener al menos 10 caracteres.');
+    if (form.name.trim().length < 3) return fail('Escribe el nombre completo (mínimo 3 letras).');
+    if (form.profession.trim().length < 2) return fail('Escribe la profesión u oficio.');
+    if (form.bio.trim().length < 10) return fail('La descripción de servicios debe tener al menos 10 caracteres.');
 
     const skills = Array.from(
       new Set(
@@ -2910,21 +2910,21 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
       )
     );
     if (skills.length === 0) return fail('Indica al menos una habilidad (separadas por coma).');
-    if (skills.length > 15) return fail('Puedes registrar mÃ¡ximo 15 habilidades.');
+    if (skills.length > 15) return fail('Puedes registrar máximo 15 habilidades.');
 
     const phone = normalizePhone(form.whatsapp);
     if (phone && !isValidColombianMobile(phone)) {
-      return fail('El celular debe tener 10 dÃ­gitos y empezar por 3 (ej. 3114567890).');
+      return fail('El celular debe tener 10 dígitos y empezar por 3 (ej. 3114567890).');
     }
     if (form.consentPublicWhatsapp && !phone) {
-      return fail('Para mostrar el botÃ³n de WhatsApp debes escribir tu nÃºmero de celular.');
+      return fail('Para mostrar el botón de WhatsApp debes escribir tu número de celular.');
     }
     const email = form.email.trim();
-    if (email && !isValidEmail(email)) return fail('El correo electrÃ³nico no es vÃ¡lido.');
+    if (email && !isValidEmail(email)) return fail('El correo electrónico no es válido.');
 
     const years = Number(form.experienceYears);
     if (!Number.isFinite(years) || years < 0 || years > 70) {
-      return fail('Los aÃ±os de experiencia deben estar entre 0 y 70.');
+      return fail('Los años de experiencia deben estar entre 0 y 70.');
     }
 
     const input: ProfileInput = {
@@ -2961,12 +2961,12 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
           {mode === 'create' ? 'Nuevo perfil' : 'Editando perfil existente'}
         </span>
         <h2 className="text-xl font-extrabold text-slate-900">
-          {mode === 'create' ? 'Crear un perfil profesional nuevo' : 'InformaciÃ³n Profesional y de Oficio'}
+          {mode === 'create' ? 'Crear un perfil profesional nuevo' : 'Información Profesional y de Oficio'}
         </h2>
         <p className="text-xs text-slate-500 mt-1">
           {mode === 'create'
-            ? 'Cada perfil que guardes aquÃ­ es independiente de los demÃ¡s. Completa los campos para aparecer en las bÃºsquedas del barrio.'
-            : 'Los cambios se guardan Ãºnicamente en este perfil.'}
+            ? 'Cada perfil que guardes aquí es independiente de los demás. Completa los campos para aparecer en las búsquedas del barrio.'
+            : 'Los cambios se guardan únicamente en este perfil.'}
         </p>
       </div>
 
@@ -2988,13 +2988,13 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
             maxLength={120}
             value={form.name}
             onChange={(e) => update('name', e.target.value)}
-            placeholder="Ej. MarÃ­a Fernanda LÃ³pez"
+            placeholder="Ej. María Fernanda López"
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
           />
         </div>
         <div>
           <label htmlFor="pf-profession" className="block text-xs font-bold text-slate-700 mb-1">
-            ProfesiÃ³n, Oficio o Emprendimiento *
+            Profesión, Oficio o Emprendimiento *
           </label>
           <input
             id="pf-profession"
@@ -3003,13 +3003,13 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
             maxLength={120}
             value={form.profession}
             onChange={(e) => update('profession', e.target.value)}
-            placeholder="Ej. Maestra de ModisterÃ­a"
+            placeholder="Ej. Maestra de Modistería"
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
           />
         </div>
         <div>
           <label htmlFor="pf-category" className="block text-xs font-bold text-slate-700 mb-1">
-            CategorÃ­a Principal *
+            Categoría Principal *
           </label>
           <select
             id="pf-category"
@@ -3026,7 +3026,7 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
         </div>
         <div>
           <label htmlFor="pf-sector" className="block text-xs font-bold text-slate-700 mb-1">
-            Sector de AtenciÃ³n *
+            Sector de Atención *
           </label>
           <select
             id="pf-sector"
@@ -3043,7 +3043,7 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
         </div>
         <div>
           <label htmlFor="pf-years" className="block text-xs font-bold text-slate-700 mb-1">
-            AÃ±os de Experiencia *
+            Años de Experiencia *
           </label>
           <input
             id="pf-years"
@@ -3093,7 +3093,7 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
 
       <div>
         <label htmlFor="pf-bio" className="block text-xs font-bold text-slate-700 mb-1">
-          DescripciÃ³n de Servicios *
+          Descripción de Servicios *
         </label>
         <textarea
           id="pf-bio"
@@ -3102,7 +3102,7 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
           maxLength={1200}
           value={form.bio}
           onChange={(e) => update('bio', e.target.value)}
-          placeholder="Describe quÃ© servicios ofreces a los habitantes de La Reliquia..."
+          placeholder="Describe qué servicios ofreces a los habitantes de La Reliquia..."
           className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
         />
       </div>
@@ -3110,7 +3110,7 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
           <label htmlFor="pf-whatsapp" className="block text-xs font-bold text-slate-700 mb-1">
-            Celular / WhatsApp (10 dÃ­gitos)
+            Celular / WhatsApp (10 dígitos)
           </label>
           <input
             id="pf-whatsapp"
@@ -3124,7 +3124,7 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
         </div>
         <div>
           <label htmlFor="pf-email" className="block text-xs font-bold text-slate-700 mb-1">
-            Correo ElectrÃ³nico (privado: solo lo ve la Junta)
+            Correo Electrónico (privado: solo lo ve la Junta)
           </label>
           <input
             id="pf-email"
@@ -3151,10 +3151,10 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
             className="mt-0.5 rounded text-blue-600 focus:ring-blue-600 w-4 h-4 shrink-0"
           />
           <span>
-            <strong>AutorizaciÃ³n obligatoria:</strong> Autorizo de manera voluntaria a la plataforma para publicar mi
+            <strong>Autorización obligatoria:</strong> Autorizo de manera voluntaria a la plataforma para publicar mi
             perfil en el directorio comunitario.{' '}
             <button type="button" onClick={onOpenPolicy} className="underline font-bold text-blue-900">
-              Leer la PolÃ­tica de Tratamiento de Datos
+              Leer la Política de Tratamiento de Datos
             </button>
           </span>
         </label>
@@ -3166,8 +3166,8 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
             className="mt-0.5 rounded text-blue-600 focus:ring-blue-600 w-4 h-4 shrink-0"
           />
           <span>
-            <strong>WhatsApp pÃºblico (Opcional):</strong> Autorizo mostrar un botÃ³n de contacto directo a mi nÃºmero de
-            WhatsApp en mi perfil pÃºblico. Si no lo marcas, tu nÃºmero NO se publica.
+            <strong>WhatsApp público (Opcional):</strong> Autorizo mostrar un botón de contacto directo a mi número de
+            WhatsApp en mi perfil público. Si no lo marcas, tu número NO se publica.
           </span>
         </label>
       </div>
@@ -3187,7 +3187,7 @@ function ProfileForm({ mode, initial, onSubmit, onOpenPolicy, showToast }: Profi
 }
 
 // ----------------------------------------------------------------------------
-// Gestor del portafolio fotogrÃ¡fico
+// Gestor del portafolio fotográfico
 // ----------------------------------------------------------------------------
 interface PortfolioManagerProps {
   myProfiles: Profile[];
@@ -3246,13 +3246,13 @@ function PortfolioManager({
     if (!file) return;
 
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      setPhotoError('Formato no permitido. Usa Ãºnicamente imÃ¡genes JPG, PNG o WEBP.');
+      setPhotoError('Formato no permitido. Usa únicamente imágenes JPG, PNG o WEBP.');
       e.target.value = '';
       return;
     }
     if (file.size > MAX_INPUT_IMAGE_MB * 1024 * 1024) {
       setPhotoError(
-        `El archivo pesa ${Math.round(file.size / 1024 / 1024)} MB y supera el mÃ¡ximo de ${MAX_INPUT_IMAGE_MB} MB.`
+        `El archivo pesa ${Math.round(file.size / 1024 / 1024)} MB y supera el máximo de ${MAX_INPUT_IMAGE_MB} MB.`
       );
       e.target.value = '';
       return;
@@ -3276,15 +3276,15 @@ function PortfolioManager({
     e.preventDefault();
     if (saving || processing) return;
     if (!activeProfile) {
-      setPhotoError('Primero crea un perfil profesional para poder subir fotografÃ­as.');
+      setPhotoError('Primero crea un perfil profesional para poder subir fotografías.');
       return;
     }
     if (photoTitle.trim().length < 3 || photoDescription.trim().length < 3) {
-      setPhotoError('Completa el tÃ­tulo y la descripciÃ³n (mÃ­nimo 3 caracteres cada uno).');
+      setPhotoError('Completa el título y la descripción (mínimo 3 caracteres cada uno).');
       return;
     }
     if (!editingItem && !processed) {
-      setPhotoError('Selecciona una fotografÃ­a para subir.');
+      setPhotoError('Selecciona una fotografía para subir.');
       return;
     }
 
@@ -3299,8 +3299,8 @@ function PortfolioManager({
       if (ok) {
         showToast(
           editingItem
-            ? 'FotografÃ­a del portafolio actualizada correctamente.'
-            : 'Â¡Nueva fotografÃ­a aÃ±adida a tu portafolio profesional!'
+            ? 'Fotografía del portafolio actualizada correctamente.'
+            : '¡Nueva fotografía añadida a tu portafolio profesional!'
         );
         resetPhotoForm();
       }
@@ -3310,7 +3310,7 @@ function PortfolioManager({
   };
 
   const handleDelete = async (item: PortfolioItem) => {
-    if (!window.confirm(`Â¿Eliminar la fotografÃ­a Â«${item.title}Â»?`)) return;
+    if (!window.confirm(`¿Eliminar la fotografía «${item.title}»?`)) return;
     const ok = await onDeletePortfolioItem(item);
     if (ok) {
       showToast('Foto eliminada.');
@@ -3321,7 +3321,7 @@ function PortfolioManager({
   if (myProfiles.length === 0) {
     return (
       <div className="p-8 bg-blue-50 border border-blue-200 rounded-2xl text-blue-900 text-sm font-semibold text-center space-y-4">
-        <p>Primero debes crear un perfil profesional antes de subir fotografÃ­as.</p>
+        <p>Primero debes crear un perfil profesional antes de subir fotografías.</p>
         <button
           type="button"
           onClick={onGoCreateProfile}
@@ -3351,7 +3351,7 @@ function PortfolioManager({
           >
             {myProfiles.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} â€” {p.profession}
+                {p.name} — {p.profession}
               </option>
             ))}
           </select>
@@ -3364,13 +3364,13 @@ function PortfolioManager({
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="font-extrabold text-slate-900 text-base flex items-center gap-2">
                 <Camera className="w-5 h-5 text-blue-800" />
-                {editingItem ? 'Editar FotografÃ­a' : 'Subir FotografÃ­a'}
+                {editingItem ? 'Editar Fotografía' : 'Subir Fotografía'}
               </h3>
             </div>
 
             <div>
               <label htmlFor="ph-title" className="block text-xs font-bold text-slate-700 mb-1">
-                TÃ­tulo del Trabajo *
+                Título del Trabajo *
               </label>
               <input
                 id="ph-title"
@@ -3379,14 +3379,14 @@ function PortfolioManager({
                 maxLength={120}
                 value={photoTitle}
                 onChange={(e) => setPhotoTitle(e.target.value)}
-                placeholder="Ej. Enchape de baÃ±o"
+                placeholder="Ej. Enchape de baño"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600 bg-white"
               />
             </div>
 
             <div>
               <label htmlFor="ph-desc" className="block text-xs font-bold text-slate-700 mb-1">
-                DescripciÃ³n del Trabajo *
+                Descripción del Trabajo *
               </label>
               <textarea
                 id="ph-desc"
@@ -3395,14 +3395,14 @@ function PortfolioManager({
                 maxLength={500}
                 value={photoDescription}
                 onChange={(e) => setPhotoDescription(e.target.value)}
-                placeholder="Explica brevemente quÃ© hiciste..."
+                placeholder="Explica brevemente qué hiciste..."
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600 bg-white"
               />
             </div>
 
             <div>
               <label htmlFor="ph-file" className="block text-xs font-bold text-slate-700 mb-1">
-                FotografÃ­a (JPG/PNG/WEBP â€¢ se optimiza a menos de 2 MB) {editingItem ? '(opcional)' : '*'}
+                Fotografía (JPG/PNG/WEBP • se optimiza a menos de 2 MB) {editingItem ? '(opcional)' : '*'}
               </label>
               <input
                 id="ph-file"
@@ -3415,7 +3415,7 @@ function PortfolioManager({
               {processing && (
                 <p className="mt-2 text-xs text-slate-500 inline-flex items-center gap-1.5">
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  Optimizando imagenâ€¦
+                  Optimizando imagen…
                 </p>
               )}
             </div>
@@ -3456,14 +3456,14 @@ function PortfolioManager({
 
         <div className="lg:col-span-7">
           <h3 className="font-extrabold text-lg text-slate-900 mb-4 border-b border-slate-200 pb-2">
-            Mis FotografÃ­as Publicadas ({profilePhotos.length})
+            Mis Fotografías Publicadas ({profilePhotos.length})
           </h3>
 
           {profilePhotos.length === 0 ? (
             <div className="p-10 text-center text-slate-500 border-2 border-dashed border-slate-200 rounded-2xl">
               <ImageIcon className="w-10 h-10 mx-auto text-slate-300 mb-3" />
               <p className="text-sm font-semibold">No tienes fotos en este portafolio.</p>
-              <p className="text-xs mt-1">Los perfiles con fotografÃ­as reales reciben mÃ¡s contactos.</p>
+              <p className="text-xs mt-1">Los perfiles con fotografías reales reciben más contactos.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2">
@@ -3511,7 +3511,7 @@ function PortfolioManager({
                       onClick={() => void handleDelete(item)}
                       className="p-1.5 rounded-lg bg-white border border-slate-200 text-red-600 hover:bg-red-50"
                       title="Eliminar"
-                      aria-label={`Eliminar fotografÃ­a ${item.title}`}
+                      aria-label={`Eliminar fotografía ${item.title}`}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -3528,7 +3528,7 @@ function PortfolioManager({
 
 
 // ============================================================================
-// VISTA 5: PANEL PRIVADO DE ADMINISTRACIÃ“N Y MODERACIÃ“N
+// VISTA 5: PANEL PRIVADO DE ADMINISTRACIÓN Y MODERACIÓN
 // ============================================================================
 function AdminDashboardView({
   isAdmin,
@@ -3555,7 +3555,7 @@ function AdminDashboardView({
   const [adminSubTab, setAdminSubTab] = useState<'perfiles' | 'portafolios' | 'vacantes' | 'reportes'>('perfiles');
   const [busy, setBusy] = useState(false);
 
-  /** Evita dobles clics mientras una acciÃ³n administrativa se estÃ¡ guardando. */
+  /** Evita dobles clics mientras una acción administrativa se está guardando. */
   const act = async (action: () => Promise<void> | void) => {
     if (busy) return;
     setBusy(true);
@@ -3566,7 +3566,7 @@ function AdminDashboardView({
     }
   };
 
-  // Defensa en profundidad: el servidor (RLS) igualmente rechaza cualquier acciÃ³n sin rol de administrador.
+  // Defensa en profundidad: el servidor (RLS) igualmente rechaza cualquier acción sin rol de administrador.
   if (!isAdmin) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
@@ -3576,7 +3576,7 @@ function AdminDashboardView({
           </div>
           <h2 className="text-2xl font-black text-slate-900">Acceso Restringido a Administradores Autorizados</h2>
           <p className="text-sm text-slate-600 max-w-lg mx-auto leading-relaxed">
-            Los permisos administrativos de <strong>La Reliquia Trabaja</strong> nunca se asignan automÃ¡ticamente al
+            Los permisos administrativos de <strong>La Reliquia Trabaja</strong> nunca se asignan automáticamente al
             registrarse: los otorga la Junta directamente en la base de datos (tabla <code>public.user_roles</code>) y
             se validan en el servidor con Supabase RLS.
           </p>
@@ -3587,7 +3587,7 @@ function AdminDashboardView({
                 onClick={onOpenLogin}
                 className="px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm"
               >
-                Iniciar sesiÃ³n como Junta
+                Iniciar sesión como Junta
               </button>
             </div>
           )}
@@ -3611,11 +3611,11 @@ function AdminDashboardView({
       <div className="bg-slate-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <span className="px-3 py-1 rounded-full bg-blue-600 text-white font-extrabold text-xs">
-            PANEL DE GOBERNANZA Y MODERACIÃ“N COMUNITARIA
+            PANEL DE GOBERNANZA Y MODERACIÓN COMUNITARIA
           </span>
-          <h1 className="text-2xl sm:text-3xl font-black mt-2">AdministraciÃ³n â€” La Reliquia Trabaja</h1>
+          <h1 className="text-2xl sm:text-3xl font-black mt-2">Administración — La Reliquia Trabaja</h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Aprueba perfiles, modera fotografÃ­as, gestiona vacantes y audita cada acciÃ³n administrativa.
+            Aprueba perfiles, modera fotografías, gestiona vacantes y audita cada acción administrativa.
           </p>
         </div>
 
@@ -3627,7 +3627,7 @@ function AdminDashboardView({
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-60 text-blue-300 font-bold text-xs border border-slate-700"
           >
             <RefreshCw className="w-4 h-4" />
-            Cargar datos de demostraciÃ³n
+            Cargar datos de demostración
           </button>
           <button
             type="button"
@@ -3636,12 +3636,12 @@ function AdminDashboardView({
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-slate-300 font-bold text-xs border border-slate-700"
           >
             <Trash2 className="w-4 h-4" />
-            Quitar datos de demostraciÃ³n
+            Quitar datos de demostración
           </button>
         </div>
       </div>
 
-      {/* EstadÃ­sticas Generales */}
+      {/* Estadísticas Generales */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <div className="bg-white p-4 rounded-2xl border border-slate-200">
           <p className="text-xs text-slate-500 font-bold">Total Perfiles</p>
@@ -3669,14 +3669,14 @@ function AdminDashboardView({
         </div>
       </div>
 
-      {/* Sub-pestaÃ±as de ModeraciÃ³n */}
+      {/* Sub-pestañas de Moderación */}
       <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
         {(
           [
             { id: 'perfiles', label: `Perfiles de Trabajadores (${profiles.length})` },
-            { id: 'portafolios', label: `ModeraciÃ³n de Fotos (${portfolioItems.length})` },
-            { id: 'vacantes', label: `RevisiÃ³n de Vacantes (${jobPostings.length})` },
-            { id: 'reportes', label: `Reportes y AuditorÃ­a (${reports.length})` }
+            { id: 'portafolios', label: `Moderación de Fotos (${portfolioItems.length})` },
+            { id: 'vacantes', label: `Revisión de Vacantes (${jobPostings.length})` },
+            { id: 'reportes', label: `Reportes y Auditoría (${reports.length})` }
           ] as const
         ).map((t) => (
           <button
@@ -3704,14 +3704,14 @@ function AdminDashboardView({
                   <th className="p-3.5 font-extrabold">Sector</th>
                   <th className="p-3.5 font-extrabold">Consentimiento Ley 1581</th>
                   <th className="p-3.5 font-extrabold">Estado</th>
-                  <th className="p-3.5 font-extrabold text-right">Acciones de ModeraciÃ³n</th>
+                  <th className="p-3.5 font-extrabold text-right">Acciones de Moderación</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
                 {profiles.length === 0 && (
                   <tr>
                     <td colSpan={5} className="p-6 text-center text-slate-500">
-                      AÃºn no hay perfiles registrados.
+                      Aún no hay perfiles registrados.
                     </td>
                   </tr>
                 )}
@@ -3728,8 +3728,8 @@ function AdminDashboardView({
                     <td className="p-3.5 text-slate-600">{p.sector}</td>
                     <td className="p-3.5">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-semibold">
-                        Habeas Data: {p.consentHabeasData ? 'SÃ­' : 'No'} â€¢ WhatsApp:{' '}
-                        {p.consentPublicWhatsapp ? 'PÃºblico' : 'Privado'}
+                        Habeas Data: {p.consentHabeasData ? 'Sí' : 'No'} • WhatsApp:{' '}
+                        {p.consentPublicWhatsapp ? 'Público' : 'Privado'}
                       </span>
                     </td>
                     <td className="p-3.5">
@@ -3793,7 +3793,7 @@ function AdminDashboardView({
         <>
           {portfolioItems.length === 0 && (
             <p className="text-sm text-slate-500 bg-white rounded-2xl border border-slate-200 p-8 text-center">
-              AÃºn no hay fotografÃ­as en los portafolios.
+              Aún no hay fotografías en los portafolios.
             </p>
           )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -3807,7 +3807,7 @@ function AdminDashboardView({
                     <img src={item.imageUrl} alt={item.title} className="w-full h-44 object-cover bg-slate-900" />
                     {item.status === 'flagged' && (
                       <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold">
-                        Oculta al pÃºblico
+                        Oculta al público
                       </span>
                     )}
                   </div>
@@ -3819,7 +3819,7 @@ function AdminDashboardView({
                 </div>
                 <div className="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2">
                   <span className="text-[11px] text-slate-500">
-                    {item.fileFormat} â€¢ {item.fileSizeKB} KB
+                    {item.fileFormat} • {item.fileSizeKB} KB
                   </span>
                   <div className="flex items-center gap-2">
                     <button
@@ -3844,7 +3844,7 @@ function AdminDashboardView({
                       type="button"
                       disabled={busy}
                       onClick={() => {
-                        if (window.confirm(`Â¿Eliminar definitivamente la fotografÃ­a Â«${item.title}Â»?`)) {
+                        if (window.confirm(`¿Eliminar definitivamente la fotografía «${item.title}»?`)) {
                           void act(() => onDeletePortfolio(item));
                         }
                       }}
@@ -3878,7 +3878,7 @@ function AdminDashboardView({
                 {jobPostings.length === 0 && (
                   <tr>
                     <td colSpan={5} className="p-6 text-center text-slate-500">
-                      AÃºn no hay vacantes publicadas.
+                      Aún no hay vacantes publicadas.
                     </td>
                   </tr>
                 )}
@@ -3942,7 +3942,7 @@ function AdminDashboardView({
             </h3>
             {reports.length === 0 ? (
               <p className="text-xs text-slate-500 py-6 text-center">
-                No hay reportes pendientes de moderaciÃ³n en este momento.
+                No hay reportes pendientes de moderación en este momento.
               </p>
             ) : (
               <div className="space-y-3">
@@ -3959,7 +3959,7 @@ function AdminDashboardView({
                       </span>
                     </div>
                     <p className="text-slate-700">
-                      <strong>Motivo:</strong> {r.reason} â€” {r.details}
+                      <strong>Motivo:</strong> {r.reason} — {r.details}
                     </p>
                     <p className="text-[11px] text-slate-400">{formatDate(r.createdAt)}</p>
                     <div className="flex flex-wrap gap-2 pt-1">
@@ -4006,7 +4006,7 @@ function AdminDashboardView({
             </h3>
             <div className="space-y-2.5 max-h-96 overflow-y-auto pr-1 text-xs">
               {adminLogs.length === 0 && (
-                <p className="text-slate-500 py-6 text-center">AÃºn no hay acciones registradas.</p>
+                <p className="text-slate-500 py-6 text-center">Aún no hay acciones registradas.</p>
               )}
               {adminLogs
                 .slice()
@@ -4017,7 +4017,7 @@ function AdminDashboardView({
                     className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start justify-between gap-2"
                   >
                     <div>
-                      <span className="font-extrabold text-slate-900">{log.action}</span> â€”{' '}
+                      <span className="font-extrabold text-slate-900">{log.action}</span> —{' '}
                       <span className="font-semibold">{log.targetName}</span>
                       <p className="text-slate-600 mt-0.5">{log.details}</p>
                       <p className="text-[10px] text-slate-400 mt-0.5">Por: {log.adminName || 'Administrador'}</p>
@@ -4036,7 +4036,7 @@ function AdminDashboardView({
 }
 
 // ============================================================================
-// VENTANA: POLÃTICA DE TRATAMIENTO DE DATOS PERSONALES (Ley 1581 de 2012)
+// VENTANA: POLÍTICA DE TRATAMIENTO DE DATOS PERSONALES (Ley 1581 de 2012)
 // ============================================================================
 function PolicyModal({ onClose }: { onClose: () => void }) {
   useEscapeKey(onClose);
@@ -4052,14 +4052,14 @@ function PolicyModal({ onClose }: { onClose: () => void }) {
           <div className="flex items-center gap-2">
             <Scale className="w-5 h-5 text-blue-400" />
             <h3 id="policy-title" className="font-black text-base">
-              PolÃ­tica de Tratamiento de Datos Personales
+              Política de Tratamiento de Datos Personales
             </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700"
-            aria-label="Cerrar polÃ­tica"
+            aria-label="Cerrar política"
           >
             <X className="w-4 h-4" />
           </button>
@@ -4073,7 +4073,7 @@ function PolicyModal({ onClose }: { onClose: () => void }) {
           <section className="space-y-1">
             <h4 className="font-extrabold text-slate-900">1. Responsable del tratamiento</h4>
             <p>
-              Proyecto comunitario <strong>La Reliquia Trabaja</strong>, administrado por la Junta de AcciÃ³n Comunal del
+              Proyecto comunitario <strong>La Reliquia Trabaja</strong>, administrado por la Junta de Acción Comunal del
               barrio La Reliquia, Villavicencio, Meta, Colombia.
             </p>
           </section>
@@ -4081,8 +4081,8 @@ function PolicyModal({ onClose }: { onClose: () => void }) {
           <section className="space-y-1">
             <h4 className="font-extrabold text-slate-900">2. Datos que se recolectan</h4>
             <p>
-              Nombre, oficio o profesiÃ³n, descripciÃ³n de servicios, sector del barrio, aÃ±os de experiencia, correo
-              electrÃ³nico, nÃºmero de celular (opcional), fotografÃ­as de trabajos realizados y los datos de la cuenta de
+              Nombre, oficio o profesión, descripción de servicios, sector del barrio, años de experiencia, correo
+              electrónico, número de celular (opcional), fotografías de trabajos realizados y los datos de la cuenta de
               acceso. Las postulaciones a vacantes incluyen nombre, celular y un mensaje breve.
             </p>
           </section>
@@ -4091,52 +4091,52 @@ function PolicyModal({ onClose }: { onClose: () => void }) {
             <h4 className="font-extrabold text-slate-900">3. Finalidad</h4>
             <p>
               Publicar tu perfil y portafolio en el directorio comunitario, facilitar el contacto directo entre vecinos y
-              empleadores, gestionar la bolsa de empleo local y permitir la moderaciÃ³n de contenidos por parte de la
+              empleadores, gestionar la bolsa de empleo local y permitir la moderación de contenidos por parte de la
               Junta. Los datos no se venden ni se usan con fines comerciales.
             </p>
           </section>
 
           <section className="space-y-1">
-            <h4 className="font-extrabold text-slate-900">4. QuÃ© es pÃºblico y quÃ© es privado</h4>
+            <h4 className="font-extrabold text-slate-900">4. Qué es público y qué es privado</h4>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Tu nÃºmero de WhatsApp solo se muestra si marcas la autorizaciÃ³n expresa Â«WhatsApp pÃºblicoÂ».</li>
-              <li>Tu correo electrÃ³nico nunca se publica: Ãºnicamente lo ve la Junta administradora.</li>
-              <li>Tu perfil solo aparece en el directorio despuÃ©s de ser aprobado por la Junta.</li>
-              <li>Los datos de una postulaciÃ³n solo los ven quien se postula, quien publicÃ³ la vacante y la Junta.</li>
+              <li>Tu número de WhatsApp solo se muestra si marcas la autorización expresa «WhatsApp público».</li>
+              <li>Tu correo electrónico nunca se publica: únicamente lo ve la Junta administradora.</li>
+              <li>Tu perfil solo aparece en el directorio después de ser aprobado por la Junta.</li>
+              <li>Los datos de una postulación solo los ven quien se postula, quien publicó la vacante y la Junta.</li>
             </ul>
           </section>
 
           <section className="space-y-1">
             <h4 className="font-extrabold text-slate-900">5. Tus derechos como titular</h4>
             <p>
-              Conocer, actualizar y rectificar tus datos; solicitar prueba de la autorizaciÃ³n otorgada; ser informado del
-              uso que se les da; presentar quejas ante la Superintendencia de Industria y Comercio; revocar la autorizaciÃ³n
-              y solicitar la supresiÃ³n de tus datos.
+              Conocer, actualizar y rectificar tus datos; solicitar prueba de la autorización otorgada; ser informado del
+              uso que se les da; presentar quejas ante la Superintendencia de Industria y Comercio; revocar la autorización
+              y solicitar la supresión de tus datos.
             </p>
             <p>
-              Puedes editar o eliminar tus perfiles y fotografÃ­as en cualquier momento desde <strong>Mi Panel</strong>. Para
-              solicitar la eliminaciÃ³n completa de tu cuenta de acceso o ejercer cualquier otro derecho, comunÃ­cate con la
-              Junta de AcciÃ³n Comunal del barrio.
+              Puedes editar o eliminar tus perfiles y fotografías en cualquier momento desde <strong>Mi Panel</strong>. Para
+              solicitar la eliminación completa de tu cuenta de acceso o ejercer cualquier otro derecho, comunícate con la
+              Junta de Acción Comunal del barrio.
             </p>
           </section>
 
           <section className="space-y-1">
             <h4 className="font-extrabold text-slate-900">6. Seguridad y almacenamiento</h4>
             <p>
-              La informaciÃ³n se almacena en una plataforma de base de datos en la nube con control de acceso por usuario.
-              Los proveedores de infraestructura pueden operar servidores fuera de Colombia (transmisiÃ³n internacional de
+              La información se almacena en una plataforma de base de datos en la nube con control de acceso por usuario.
+              Los proveedores de infraestructura pueden operar servidores fuera de Colombia (transmisión internacional de
               datos con fines de alojamiento).
             </p>
           </section>
 
           <section className="space-y-1">
             <h4 className="font-extrabold text-slate-900">7. Menores de edad</h4>
-            <p>La plataforma estÃ¡ dirigida a personas mayores de 18 aÃ±os. Los menores solo pueden participar con autorizaciÃ³n de sus padres o tutores.</p>
+            <p>La plataforma está dirigida a personas mayores de 18 años. Los menores solo pueden participar con autorización de sus padres o tutores.</p>
           </section>
 
           <p className="text-[11px] text-slate-500 border-t border-slate-200 pt-3">
-            Texto base informativo. La Junta de AcciÃ³n Comunal debe revisarlo con asesorÃ­a jurÃ­dica y completarlo con sus
-            datos oficiales de contacto antes de su adopciÃ³n formal.
+            Texto base informativo. La Junta de Acción Comunal debe revisarlo con asesoría jurídica y completarlo con sus
+            datos oficiales de contacto antes de su adopción formal.
           </p>
 
           <div className="flex justify-end">
@@ -4155,24 +4155,24 @@ function PolicyModal({ onClose }: { onClose: () => void }) {
 }
 
 // ============================================================================
-// VISTA 6: CENTRO TÃ‰CNICO PARA LA JUNTA (solo administradores)
+// VISTA 6: CENTRO TÉCNICO PARA LA JUNTA (solo administradores)
 // ============================================================================
 const PROJECT_STRUCTURE = `la-reliquia-trabaja/
-â”œâ”€â”€ .env                         # VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY
-â”œâ”€â”€ index.html                   # Punto de entrada
-â”œâ”€â”€ main.tsx                     # Renderizado raÃ­z de React
-â”œâ”€â”€ la_reliquia_trabaja_plataforma_comunitaria.tsx   # Interfaz completa
-â”œâ”€â”€ lib/
-â”‚   â”œâ”€â”€ api.ts                   # Auth + lectura/escritura en Supabase
-â”‚   â”œâ”€â”€ mappers.ts               # camelCase <-> snake_case
-â”‚   â”œâ”€â”€ catalogs.ts Â· seed.ts Â· types.ts Â· utils.ts Â· supabase.ts
-â”œâ”€â”€ supabase/schema.sql          # Script SQL definitivo (tablas, RLS, Storage)
-â”œâ”€â”€ netlify.toml                 # CompilaciÃ³n y despliegue en Netlify
-â””â”€â”€ tailwind.config.js Â· postcss.config.js Â· tsconfig.json`;
+├── .env                         # VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY
+├── index.html                   # Punto de entrada
+├── main.tsx                     # Renderizado raíz de React
+├── la_reliquia_trabaja_plataforma_comunitaria.tsx   # Interfaz completa
+├── lib/
+│   ├── api.ts                   # Auth + lectura/escritura en Supabase
+│   ├── mappers.ts               # camelCase <-> snake_case
+│   ├── catalogs.ts · seed.ts · types.ts · utils.ts · supabase.ts
+├── supabase/schema.sql          # Script SQL definitivo (tablas, RLS, Storage)
+├── netlify.toml                 # Compilación y despliegue en Netlify
+└── tailwind.config.js · postcss.config.js · tsconfig.json`;
 
 function TechnicalArchitectureView({ showToast }: { showToast: ShowToast }) {
   const [copiedSql, setCopiedSql] = useState(false);
-  const [sqlSchema, setSqlSchema] = useState<string>('Cargando script SQLâ€¦');
+  const [sqlSchema, setSqlSchema] = useState<string>('Cargando script SQL…');
 
   useEffect(() => {
     let cancelled = false;
@@ -4195,7 +4195,7 @@ function TechnicalArchitectureView({ showToast }: { showToast: ShowToast }) {
       showToast('Script SQL completo con RLS y Storage copiado al portapapeles.');
       window.setTimeout(() => setCopiedSql(false), 3000);
     } catch {
-      showToast('No se pudo copiar automÃ¡ticamente. Selecciona el texto y cÃ³pialo manualmente.', 'error');
+      showToast('No se pudo copiar automáticamente. Selecciona el texto y cópialo manualmente.', 'error');
     }
   };
 
@@ -4203,7 +4203,7 @@ function TechnicalArchitectureView({ showToast }: { showToast: ShowToast }) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       <div className="bg-slate-950 text-white rounded-3xl p-6 sm:p-8 border border-slate-800">
         <span className="px-3 py-1 rounded-full bg-blue-600 text-white font-extrabold text-xs">
-          DOCUMENTACIÃ“N TÃ‰CNICA â€” SOLO JUNTA ADMINISTRADORA
+          DOCUMENTACIÓN TÉCNICA — SOLO JUNTA ADMINISTRADORA
         </span>
         <h1 className="text-2xl sm:text-3xl font-black mt-2">
           Base de Datos (Supabase PostgreSQL + RLS) y Vite / React
@@ -4226,7 +4226,7 @@ function TechnicalArchitectureView({ showToast }: { showToast: ShowToast }) {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs"
             >
               {copiedSql ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedSql ? 'Â¡Copiado!' : 'Copiar SQL'}</span>
+              <span>{copiedSql ? '¡Copiado!' : 'Copiar SQL'}</span>
             </button>
           </div>
           <pre className="p-5 text-xs font-mono overflow-x-auto max-h-[560px] leading-relaxed text-slate-300">
@@ -4248,7 +4248,7 @@ function TechnicalArchitectureView({ showToast }: { showToast: ShowToast }) {
           <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
             <h3 className="font-extrabold text-sm text-slate-900">Variables de Entorno (.env y Netlify)</h3>
             <p className="text-xs text-slate-600">
-              Usa Ãºnicamente la clave pÃºblica anÃ³nima protegida por polÃ­ticas RLS. Nunca publiques la clave
+              Usa únicamente la clave pública anónima protegida por políticas RLS. Nunca publiques la clave
               <code> service_role</code>:
             </p>
             <pre className="p-3 rounded-xl bg-slate-100 text-slate-800 text-[11px] font-mono overflow-x-auto">
@@ -4259,11 +4259,11 @@ function TechnicalArchitectureView({ showToast }: { showToast: ShowToast }) {
           <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-2.5 text-xs text-slate-800">
             <h3 className="font-extrabold text-sm">Puesta en marcha (una sola vez)</h3>
             <ol className="list-decimal pl-4 space-y-1.5">
-              <li>Supabase â†’ SQL Editor: ejecutar <code>supabase/schema.sql</code> completo.</li>
-              <li>Authentication â†’ URL Configuration: poner la URL de Netlify como Â«Site URLÂ» y en Â«Redirect URLsÂ».</li>
+              <li>Supabase → SQL Editor: ejecutar <code>supabase/schema.sql</code> completo.</li>
+              <li>Authentication → URL Configuration: poner la URL de Netlify como «Site URL» y en «Redirect URLs».</li>
               <li>Cada integrante de la Junta se registra normalmente en la plataforma.</li>
-              <li>SQL Editor: asignar el rol con el bloque Â«NOMBRAR ADMINISTRADORESÂ» al final del script.</li>
-              <li>Netlify â†’ Environment variables: definir las dos variables VITE_ y volver a desplegar.</li>
+              <li>SQL Editor: asignar el rol con el bloque «NOMBRAR ADMINISTRADORES» al final del script.</li>
+              <li>Netlify → Environment variables: definir las dos variables VITE_ y volver a desplegar.</li>
             </ol>
           </div>
 
@@ -4273,11 +4273,11 @@ function TechnicalArchitectureView({ showToast }: { showToast: ShowToast }) {
               Checklist Regulatorio Colombia
             </h3>
             <p>
-              <strong>1. Ley 1581 de 2012 y Decreto 1377 de 2013:</strong> Se exige autorizaciÃ³n previa e informada para
-              publicar datos personales y nÃºmero de WhatsApp, con opciÃ³n de revocatoria y supresiÃ³n inmediata.
+              <strong>1. Ley 1581 de 2012 y Decreto 1377 de 2013:</strong> Se exige autorización previa e informada para
+              publicar datos personales y número de WhatsApp, con opción de revocatoria y supresión inmediata.
             </p>
             <p>
-              <strong>2. Servicio PÃºblico de Empleo (Ley 1636 de 2013):</strong> Opera como directorio comunitario
+              <strong>2. Servicio Público de Empleo (Ley 1636 de 2013):</strong> Opera como directorio comunitario
               gratuito de contacto vecinal directo y cartelera abierta.
             </p>
           </div>
@@ -4341,7 +4341,7 @@ function WorkerProfileModal({
                 {worker.sector}
               </p>
               <p className="text-slate-300">
-                Experiencia: <strong>{worker.experienceYears} aÃ±os</strong>
+                Experiencia: <strong>{worker.experienceYears} años</strong>
               </p>
               <p className="text-slate-300">
                 Disponibilidad: <strong>{worker.availability}</strong>
@@ -4354,8 +4354,8 @@ function WorkerProfileModal({
           {worker.status !== 'approved' && (
             <div role="status" className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 font-semibold">
               {worker.status === 'pending'
-                ? 'Este perfil estÃ¡ en revisiÃ³n: solo lo ven su dueÃ±o y la Junta. Se publicarÃ¡ en el directorio cuando sea aprobado.'
-                : 'Este perfil estÃ¡ suspendido por la Junta y no es visible para el pÃºblico.'}
+                ? 'Este perfil está en revisión: solo lo ven su dueño y la Junta. Se publicará en el directorio cuando sea aprobado.'
+                : 'Este perfil está suspendido por la Junta y no es visible para el público.'}
             </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -4377,7 +4377,7 @@ function WorkerProfileModal({
                       key={index}
                       className="px-3 py-1 rounded-xl bg-slate-100 border border-slate-200 text-slate-900 font-bold text-xs"
                     >
-                      âœ“ {skill}
+                      ✓ {skill}
                     </span>
                   ))}
                 </div>
@@ -4392,7 +4392,7 @@ function WorkerProfileModal({
                 {worker.consentPublicWhatsapp && worker.whatsapp ? (
                   <>
                     <p className="text-xs text-slate-600">
-                      Este trabajador autorizÃ³ publicar su lÃ­nea de WhatsApp para cotizaciones y contrataciones:
+                      Este trabajador autorizó publicar su línea de WhatsApp para cotizaciones y contrataciones:
                     </p>
                     <p className="text-base font-black text-blue-900">
                       +57 {worker.whatsapp}
@@ -4409,10 +4409,10 @@ function WorkerProfileModal({
                   <div className="p-3 rounded-xl bg-slate-200/80 text-xs text-slate-700 space-y-1">
                     <p className="font-bold flex items-center gap-1.5">
                       <Lock className="w-4 h-4 text-slate-600" />
-                      NÃºmero TelefÃ³nico Reservado
+                      Número Telefónico Reservado
                     </p>
                     <p>
-                      Por configuraciÃ³n de privacidad (Ley 1581 de 2012), este vecino prefiriÃ³ no publicar su nÃºmero de WhatsApp.
+                      Por configuración de privacidad (Ley 1581 de 2012), este vecino prefirió no publicar su número de WhatsApp.
                     </p>
                   </div>
                 )}
@@ -4423,7 +4423,7 @@ function WorkerProfileModal({
                 className="text-[11px] font-semibold text-slate-500 hover:text-red-600 inline-flex items-center gap-1 self-start"
               >
                 <Flag className="w-3.5 h-3.5" />
-                Reportar perfil a moderaciÃ³n
+                Reportar perfil a moderación
               </button>
             </div>
           </div>
@@ -4436,14 +4436,14 @@ function WorkerProfileModal({
                   Portafolio de Trabajos Realizados ({portfolio.length})
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Haz clic sobre cualquier fotografÃ­a para ampliarla en pantalla completa.
+                  Haz clic sobre cualquier fotografía para ampliarla en pantalla completa.
                 </p>
               </div>
             </div>
 
             {portfolio.length === 0 ? (
               <div className="p-8 rounded-2xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
-                Este trabajador aÃºn no ha subido fotografÃ­as a su galerÃ­a.
+                Este trabajador aún no ha subido fotografías a su galería.
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -4487,7 +4487,7 @@ function WhatsappContactModal({ worker, onClose }: WhatsappContactModalProps) {
   useEscapeKey(onClose);
   const cleanPhone = normalizePhone(worker.whatsapp ?? '');
   const message = encodeURIComponent(
-    `Hola ${worker.name}, vi tu perfil de *${worker.profession}* en la plataforma comunitaria *La Reliquia Trabaja* (Villavicencio) y me gustarÃ­a cotizar un servicio.`
+    `Hola ${worker.name}, vi tu perfil de *${worker.profession}* en la plataforma comunitaria *La Reliquia Trabaja* (Villavicencio) y me gustaría cotizar un servicio.`
   );
   const waUrl = `https://wa.me/57${cleanPhone}?text=${message}`;
 
@@ -4515,10 +4515,10 @@ function WhatsappContactModal({ worker, onClose }: WhatsappContactModalProps) {
 
         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-2">
           <p className="text-slate-500 font-semibold">
-            LÃ­nea autorizada en Colombia: <strong>+57 {cleanPhone}</strong>
+            Línea autorizada en Colombia: <strong>+57 {cleanPhone}</strong>
           </p>
           <p className="text-slate-700 italic">
-            "Hola {worker.name}, vi tu perfil de {worker.profession} en la plataforma comunitaria La Reliquia Trabaja y me gustarÃ­a cotizar un servicio."
+            "Hola {worker.name}, vi tu perfil de {worker.profession} en la plataforma comunitaria La Reliquia Trabaja y me gustaría cotizar un servicio."
           </p>
         </div>
 
@@ -4580,15 +4580,15 @@ function JobDetailModal({
     setFormError('');
     const phone = normalizePhone(applicantPhone);
     if (applicantName.trim().length < 3) {
-      setFormError('Escribe tu nombre completo (mÃ­nimo 3 letras).');
+      setFormError('Escribe tu nombre completo (mínimo 3 letras).');
       return;
     }
     if (!isValidColombianMobile(phone)) {
-      setFormError('Tu celular debe tener 10 dÃ­gitos y empezar por 3 (ej. 3114567890).');
+      setFormError('Tu celular debe tener 10 dígitos y empezar por 3 (ej. 3114567890).');
       return;
     }
     if (applicantMessage.trim().length < 5) {
-      setFormError('CuÃ©ntale al empleador un poco sobre ti (mÃ­nimo 5 caracteres).');
+      setFormError('Cuéntale al empleador un poco sobre ti (mínimo 5 caracteres).');
       return;
     }
 
@@ -4601,7 +4601,7 @@ function JobDetailModal({
         applicantMessage: applicantMessage.trim()
       });
       if (ok) {
-        showToast(`Â¡Tu postulaciÃ³n a "${job.title}" fue enviada con Ã©xito!`);
+        showToast(`¡Tu postulación a "${job.title}" fue enviada con éxito!`);
         setApplicantMessage('');
       }
     } finally {
@@ -4626,7 +4626,7 @@ function JobDetailModal({
           </span>
           <h2 className="text-2xl font-black mt-2 pr-10">{job.title}</h2>
           <p className="text-sm font-bold text-slate-300 mt-0.5">
-            {job.company} â€¢ {job.sector}
+            {job.company} • {job.sector}
           </p>
         </div>
 
@@ -4641,18 +4641,18 @@ function JobDetailModal({
               <strong className="text-slate-900">{job.modality}</strong>
             </div>
             <div>
-              <span className="text-slate-500 block">RemuneraciÃ³n (COP)</span>
+              <span className="text-slate-500 block">Remuneración (COP)</span>
               <strong className="text-blue-900">{job.salaryCOP || 'A convenir'}</strong>
             </div>
             <div>
-              <span className="text-slate-500 block">Fecha lÃ­mite</span>
+              <span className="text-slate-500 block">Fecha límite</span>
               <strong className="text-slate-900">{formatDate(job.closingDate)}</strong>
             </div>
           </div>
 
           <div>
             <h3 className="text-sm font-extrabold uppercase text-slate-500 mb-2">
-              DescripciÃ³n de la Vacante
+              Descripción de la Vacante
             </h3>
             <p className="text-sm text-slate-700 leading-relaxed">{job.description}</p>
           </div>
@@ -4677,25 +4677,25 @@ function JobDetailModal({
             </div>
           ) : isAuthor ? (
             <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold text-center">
-              Esta es tu vacante. Las postulaciones recibidas aparecen mÃ¡s abajo.
+              Esta es tu vacante. Las postulaciones recibidas aparecen más abajo.
             </div>
           ) : !currentUser ? (
             <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 space-y-3">
               <h4 className="font-extrabold text-base text-blue-950">Postularme a esta vacante</h4>
               <p className="text-xs text-blue-900">
-                Para enviar tu postulaciÃ³n necesitas una cuenta gratuita. AsÃ­ protegemos tus datos (Ley 1581 de 2012).
+                Para enviar tu postulación necesitas una cuenta gratuita. Así protegemos tus datos (Ley 1581 de 2012).
               </p>
               <button
                 type="button"
                 onClick={onRequireLogin}
                 className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs"
               >
-                Iniciar sesiÃ³n o registrarme
+                Iniciar sesión o registrarme
               </button>
             </div>
           ) : myApplication ? (
             <div role="status" className="p-4 rounded-2xl bg-green-50 border border-green-200 text-green-900 text-xs font-bold">
-              Ya te postulaste a esta vacante el {formatDate(myApplication.createdAt)}. El empleador podrÃ¡ contactarte
+              Ya te postulaste a esta vacante el {formatDate(myApplication.createdAt)}. El empleador podrá contactarte
               al {myApplication.applicantPhone}.
             </div>
           ) : (
@@ -4725,7 +4725,7 @@ function JobDetailModal({
                   required
                   value={applicantPhone}
                   onChange={(e) => setApplicantPhone(e.target.value)}
-                  placeholder="Tu celular / WhatsApp (10 dÃ­gitos) *"
+                  placeholder="Tu celular / WhatsApp (10 dígitos) *"
                   aria-label="Tu celular o WhatsApp"
                   className="px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:border-blue-600"
                 />
@@ -4736,7 +4736,7 @@ function JobDetailModal({
                 maxLength={1000}
                 value={applicantMessage}
                 onChange={(e) => setApplicantMessage(e.target.value)}
-                placeholder="CuÃ©ntale brevemente al empleador tu experiencia y en quÃ© sector de La Reliquia vives..."
+                placeholder="Cuéntale brevemente al empleador tu experiencia y en qué sector de La Reliquia vives..."
                 aria-label="Mensaje para el empleador"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:border-blue-600"
               />
@@ -4750,7 +4750,7 @@ function JobDetailModal({
                   className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-extrabold text-xs inline-flex items-center gap-2"
                 >
                   {sending && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Enviar PostulaciÃ³n Ahora
+                  Enviar Postulación Ahora
                 </button>
               </div>
             </form>
@@ -4761,7 +4761,7 @@ function JobDetailModal({
               <span className="text-slate-700">
                 Contacto directo del empleador:{' '}
                 <strong className="text-slate-900">
-                  {[employerPhone ? `+57 ${employerPhone}` : '', job.contactEmail].filter(Boolean).join(' â€¢ ')}
+                  {[employerPhone ? `+57 ${employerPhone}` : '', job.contactEmail].filter(Boolean).join(' • ')}
                 </strong>
               </span>
               {employerPhone && (
@@ -4792,7 +4792,7 @@ function JobDetailModal({
                     className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between gap-3"
                   >
                     <div>
-                      <strong className="text-slate-900">{app.applicantName}</strong> â€”{' '}
+                      <strong className="text-slate-900">{app.applicantName}</strong> —{' '}
                       <span className="text-slate-600">{app.applicantMessage}</span>
                     </div>
                     <a
@@ -4866,19 +4866,19 @@ function JobFormModal({ editingJob, showToast, onClose, onSaveJob, onDeleteJob }
     const phone = normalizePhone(form.contactWhatsapp);
     const email = form.contactEmail.trim();
 
-    if (form.title.trim().length < 3) return setFormError('Escribe el nombre del cargo (mÃ­nimo 3 letras).');
+    if (form.title.trim().length < 3) return setFormError('Escribe el nombre del cargo (mínimo 3 letras).');
     if (form.company.trim().length < 2) return setFormError('Escribe el nombre de la empresa o contratista.');
     if (form.description.trim().length < 10) {
-      return setFormError('La descripciÃ³n debe tener al menos 10 caracteres.');
+      return setFormError('La descripción debe tener al menos 10 caracteres.');
     }
-    if (requirements.length === 0) return setFormError('Escribe al menos un requisito (uno por lÃ­nea).');
+    if (requirements.length === 0) return setFormError('Escribe al menos un requisito (uno por línea).');
     if (!phone && !email) {
-      return setFormError('Indica al menos un medio de contacto: WhatsApp o correo electrÃ³nico.');
+      return setFormError('Indica al menos un medio de contacto: WhatsApp o correo electrónico.');
     }
     if (phone && !isValidColombianMobile(phone)) {
-      return setFormError('El WhatsApp debe tener 10 dÃ­gitos y empezar por 3 (ej. 3114567890).');
+      return setFormError('El WhatsApp debe tener 10 dígitos y empezar por 3 (ej. 3114567890).');
     }
-    if (email && !isValidEmail(email)) return setFormError('El correo de contacto no es vÃ¡lido.');
+    if (email && !isValidEmail(email)) return setFormError('El correo de contacto no es válido.');
     if (!editingJob && form.closingDate < todayISO()) {
       return setFormError('La fecha de cierre no puede ser anterior a hoy.');
     }
@@ -4906,7 +4906,7 @@ function JobFormModal({ editingJob, showToast, onClose, onSaveJob, onDeleteJob }
         showToast(
           editingJob
             ? 'Oferta laboral actualizada correctamente.'
-            : 'Â¡Nueva vacante publicada en la Bolsa de Empleo de La Reliquia!'
+            : '¡Nueva vacante publicada en la Bolsa de Empleo de La Reliquia!'
         );
         onClose();
       }
@@ -4917,7 +4917,7 @@ function JobFormModal({ editingJob, showToast, onClose, onSaveJob, onDeleteJob }
 
   const handleDelete = async () => {
     if (!editingJob || saving || deleting) return;
-    if (!window.confirm(`Â¿Eliminar definitivamente la vacante Â«${editingJob.title}Â»? Se borrarÃ¡n sus postulaciones.`)) {
+    if (!window.confirm(`¿Eliminar definitivamente la vacante «${editingJob.title}»? Se borrarán sus postulaciones.`)) {
       return;
     }
     setDeleting(true);
@@ -4963,7 +4963,7 @@ function JobFormModal({ editingJob, showToast, onClose, onSaveJob, onDeleteJob }
                 required
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="Ej. Oficial de ConstrucciÃ³n / Auxiliar de PanaderÃ­a"
+                placeholder="Ej. Oficial de Construcción / Auxiliar de Panadería"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
               />
             </div>
@@ -4977,14 +4977,14 @@ function JobFormModal({ editingJob, showToast, onClose, onSaveJob, onDeleteJob }
                 required
                 value={form.company}
                 onChange={(e) => setForm({ ...form, company: e.target.value })}
-                placeholder="Ej. PanaderÃ­a El Trigal / Maestro Carlos"
+                placeholder="Ej. Panadería El Trigal / Maestro Carlos"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
               />
             </div>
 
             <div>
               <label className="font-bold text-slate-700 block mb-1">
-                CategorÃ­a *
+                Categoría *
               </label>
               <select
                 value={form.category}
@@ -5001,7 +5001,7 @@ function JobFormModal({ editingJob, showToast, onClose, onSaveJob, onDeleteJob }
 
             <div>
               <label className="font-bold text-slate-700 block mb-1">
-                UbicaciÃ³n / Sector *
+                Ubicación / Sector *
               </label>
               <select
                 value={form.sector}
@@ -5052,13 +5052,13 @@ function JobFormModal({ editingJob, showToast, onClose, onSaveJob, onDeleteJob }
 
             <div>
               <label className="font-bold text-slate-700 block mb-1">
-                RemuneraciÃ³n en Pesos (COP $)
+                Remuneración en Pesos (COP $)
               </label>
               <input
                 type="text"
                 value={form.salaryCOP}
                 onChange={(e) => setForm({ ...form, salaryCOP: e.target.value })}
-                placeholder="Ej. $1.450.000 mensual o $75.000 dÃ­a"
+                placeholder="Ej. $1.450.000 mensual o $75.000 día"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
               />
             </div>
@@ -5080,7 +5080,7 @@ function JobFormModal({ editingJob, showToast, onClose, onSaveJob, onDeleteJob }
 
           <div>
             <label className="font-bold text-slate-700 block mb-1">
-              DescripciÃ³n de Funciones y Horario *
+              Descripción de Funciones y Horario *
             </label>
             <textarea
               rows={3}
@@ -5093,14 +5093,14 @@ function JobFormModal({ editingJob, showToast, onClose, onSaveJob, onDeleteJob }
 
           <div>
             <label className="font-bold text-slate-700 block mb-1">
-              Requisitos (uno por lÃ­nea) *
+              Requisitos (uno por línea) *
             </label>
             <textarea
               rows={3}
               required
               value={form.requirementsText}
               onChange={(e) => setForm({ ...form, requirementsText: e.target.value })}
-              placeholder={`Vivir en La Reliquia\nExperiencia mÃ­nima de 6 meses`}
+              placeholder={`Vivir en La Reliquia\nExperiencia mínima de 6 meses`}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
             />
           </div>
@@ -5186,7 +5186,7 @@ function JobFormModal({ editingJob, showToast, onClose, onSaveJob, onDeleteJob }
 }
 
 function ReportModal({ reportData, showToast, onClose, onSubmitReport }: ReportModalProps) {
-  const [reason, setReason] = useState('InformaciÃ³n falsa o engaÃ±osa');
+  const [reason, setReason] = useState('Información falsa o engañosa');
   const [details, setDetails] = useState('');
   const [sending, setSending] = useState(false);
 
@@ -5205,7 +5205,7 @@ function ReportModal({ reportData, showToast, onClose, onSubmitReport }: ReportM
         details
       });
       if (ok) {
-        showToast('Reporte enviado al equipo de moderaciÃ³n de La Reliquia Trabaja.');
+        showToast('Reporte enviado al equipo de moderación de La Reliquia Trabaja.');
         onClose();
       }
     } finally {
@@ -5221,7 +5221,7 @@ function ReportModal({ reportData, showToast, onClose, onSubmitReport }: ReportM
       >
         <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
           <Flag className="w-5 h-5 text-red-600" />
-          Reportar PublicaciÃ³n a ModeraciÃ³n
+          Reportar Publicación a Moderación
         </h3>
         <p className="text-xs font-bold text-slate-600">{reportData.targetTitle}</p>
 
@@ -5234,10 +5234,10 @@ function ReportModal({ reportData, showToast, onClose, onSubmitReport }: ReportM
             onChange={(e) => setReason(e.target.value)}
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:border-blue-600"
           >
-            <option>InformaciÃ³n falsa o engaÃ±osa</option>
-            <option>Cobro indebido por postulaciÃ³n</option>
-            <option>FotografÃ­a inapropiada o que no corresponde</option>
-            <option>SuplantaciÃ³n de identidad</option>
+            <option>Información falsa o engañosa</option>
+            <option>Cobro indebido por postulación</option>
+            <option>Fotografía inapropiada o que no corresponde</option>
+            <option>Suplantación de identidad</option>
             <option>Otro motivo</option>
           </select>
         </div>
@@ -5251,7 +5251,7 @@ function ReportModal({ reportData, showToast, onClose, onSubmitReport }: ReportM
             required
             value={details}
             onChange={(e) => setDetails(e.target.value)}
-            placeholder="Describe quÃ© ocurre para que el administrador lo revise..."
+            placeholder="Describe qué ocurre para que el administrador lo revise..."
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
           />
         </div>
@@ -5312,13 +5312,13 @@ function AuthAccountModal({
 
     if (!isSupabaseConfigured) {
       setErrorMessage(
-        'La plataforma no estÃ¡ conectada a Supabase (faltan VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY), por eso no se puede iniciar sesiÃ³n.'
+        'La plataforma no está conectada a Supabase (faltan VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY), por eso no se puede iniciar sesión.'
       );
       return;
     }
 
     if (mode !== 'recover' && passwordInput.length < 8) {
-      setErrorMessage('La contraseÃ±a debe tener al menos 8 caracteres.');
+      setErrorMessage('La contraseña debe tener al menos 8 caracteres.');
       return;
     }
     if (mode === 'register') {
@@ -5328,12 +5328,12 @@ function AuthAccountModal({
         return;
       }
       if (nameInput.trim().length < 3) {
-        setErrorMessage('Escribe tu nombre completo (mÃ­nimo 3 letras).');
+        setErrorMessage('Escribe tu nombre completo (mínimo 3 letras).');
         return;
       }
     }
     if (mode !== 'reset' && !isValidEmail(emailInput)) {
-      setErrorMessage('Escribe un correo electrÃ³nico vÃ¡lido.');
+      setErrorMessage('Escribe un correo electrónico válido.');
       return;
     }
 
@@ -5341,31 +5341,31 @@ function AuthAccountModal({
     try {
       if (mode === 'login') {
         await signInAccount(emailInput, passwordInput);
-        showToast('SesiÃ³n iniciada correctamente.');
+        showToast('Sesión iniciada correctamente.');
         onAuthenticated(false);
       } else if (mode === 'register') {
         const { needsEmailConfirmation } = await signUpAccount(emailInput, passwordInput, nameInput);
         if (needsEmailConfirmation) {
           setNotice(
-            `Te enviamos un correo de confirmaciÃ³n a ${emailInput.trim()}. Ãbrelo y pulsa el enlace para activar tu cuenta (revisa tambiÃ©n la carpeta de spam).`
+            `Te enviamos un correo de confirmación a ${emailInput.trim()}. Ábrelo y pulsa el enlace para activar tu cuenta (revisa también la carpeta de spam).`
           );
         } else {
-          showToast(`Cuenta creada. Â¡Bienvenido/a, ${nameInput.trim()}!`);
+          showToast(`Cuenta creada. ¡Bienvenido/a, ${nameInput.trim()}!`);
           onAuthenticated(true);
         }
       } else if (mode === 'recover') {
         await sendPasswordReset(emailInput);
         setNotice(
-          `Si ${emailInput.trim()} tiene una cuenta, recibirÃ¡ un enlace para crear una contraseÃ±a nueva. Revisa tu bandeja de entrada.`
+          `Si ${emailInput.trim()} tiene una cuenta, recibirá un enlace para crear una contraseña nueva. Revisa tu bandeja de entrada.`
         );
       } else {
         await setNewPassword(passwordInput);
-        showToast('ContraseÃ±a actualizada correctamente.');
+        showToast('Contraseña actualizada correctamente.');
         onAuthenticated(false);
       }
     } catch (err) {
-      console.error('[La Reliquia Trabaja] Error de autenticaciÃ³n:', err);
-      setErrorMessage(describeError(err, 'No se pudo completar la operaciÃ³n.'));
+      console.error('[La Reliquia Trabaja] Error de autenticación:', err);
+      setErrorMessage(describeError(err, 'No se pudo completar la operación.'));
     } finally {
       setSubmitting(false);
     }
@@ -5373,12 +5373,12 @@ function AuthAccountModal({
 
   const title =
     mode === 'login'
-      ? 'Iniciar SesiÃ³n'
+      ? 'Iniciar Sesión'
       : mode === 'register'
         ? 'Registro en La Reliquia'
         : mode === 'recover'
-          ? 'Recuperar ContraseÃ±a'
-          : 'Crear ContraseÃ±a Nueva';
+          ? 'Recuperar Contraseña'
+          : 'Crear Contraseña Nueva';
 
   return (
     <div
@@ -5415,7 +5415,7 @@ function AuthAccountModal({
                 mode === 'login' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Iniciar SesiÃ³n
+              Iniciar Sesión
             </button>
             <button
               type="button"
@@ -5463,7 +5463,7 @@ function AuthAccountModal({
                   autoComplete="name"
                   value={nameInput}
                   onChange={(e) => setNameInput(e.target.value)}
-                  placeholder="Ej. Juan PÃ©rez"
+                  placeholder="Ej. Juan Pérez"
                   className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
                 />
               </div>
@@ -5472,7 +5472,7 @@ function AuthAccountModal({
             {mode !== 'reset' && (
               <div>
                 <label htmlFor="auth-email" className="font-bold text-slate-700 block mb-1">
-                  Correo ElectrÃ³nico *
+                  Correo Electrónico *
                 </label>
                 <input
                   id="auth-email"
@@ -5490,7 +5490,7 @@ function AuthAccountModal({
             {mode !== 'recover' && (
               <div>
                 <label htmlFor="auth-password" className="font-bold text-slate-700 block mb-1">
-                  {mode === 'reset' ? 'ContraseÃ±a nueva *' : 'ContraseÃ±a *'}
+                  {mode === 'reset' ? 'Contraseña nueva *' : 'Contraseña *'}
                 </label>
                 <div className="relative">
                   <input
@@ -5501,14 +5501,14 @@ function AuthAccountModal({
                     autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                     value={passwordInput}
                     onChange={(e) => setPasswordInput(e.target.value)}
-                    placeholder="MÃ­nimo 8 caracteres"
+                    placeholder="Mínimo 8 caracteres"
                     className="w-full px-4 py-3 pr-12 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800"
-                    aria-label={showPassword ? 'Ocultar contraseÃ±a' : 'Mostrar contraseÃ±a'}
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -5522,13 +5522,13 @@ function AuthAccountModal({
                 onClick={() => changeMode('recover')}
                 className="text-blue-800 font-bold underline"
               >
-                Â¿Olvidaste tu contraseÃ±a?
+                ¿Olvidaste tu contraseña?
               </button>
             )}
 
             {mode === 'recover' && (
               <button type="button" onClick={() => changeMode('login')} className="text-blue-800 font-bold underline">
-                Volver a iniciar sesiÃ³n
+                Volver a iniciar sesión
               </button>
             )}
 
@@ -5542,10 +5542,10 @@ function AuthAccountModal({
                   className="mt-0.5 rounded text-blue-600 focus:ring-blue-600 w-4 h-4 shrink-0"
                 />
                 <span className="text-slate-800 text-[11px] leading-relaxed">
-                  <strong>AutorizaciÃ³n (Ley 1581 de 2012):</strong> Acepto el tratamiento de mis datos personales para
+                  <strong>Autorización (Ley 1581 de 2012):</strong> Acepto el tratamiento de mis datos personales para
                   crear mi cuenta y perfil en la plataforma comunitaria La Reliquia Trabaja.{' '}
                   <button type="button" onClick={onOpenPolicy} className="underline font-bold text-blue-900">
-                    Leer polÃ­tica
+                    Leer política
                   </button>
                 </span>
               </label>
@@ -5559,8 +5559,8 @@ function AuthAccountModal({
               {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
               {mode === 'login' && 'Entrar a mi Cuenta'}
               {mode === 'register' && 'Completar Registro'}
-              {mode === 'recover' && 'Enviar enlace de recuperaciÃ³n'}
-              {mode === 'reset' && 'Guardar contraseÃ±a nueva'}
+              {mode === 'recover' && 'Enviar enlace de recuperación'}
+              {mode === 'reset' && 'Guardar contraseña nueva'}
             </button>
           </form>
         )}
